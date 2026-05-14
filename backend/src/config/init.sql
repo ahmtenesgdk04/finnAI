@@ -1,0 +1,5 @@
+-- TODO: FinnAI veritabanı şeması
+-- Tablolar: users, expenses, incomes, customers, receivables,
+-- personal_budget, personal_expenses, savings_goals,
+-- subscriptions, debts, installments, coach_progress,
+-- safe_shop_queries, documents, notes
