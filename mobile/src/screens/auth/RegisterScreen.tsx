@@ -1,210 +1,99 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform,
-  ActivityIndicator, ScrollView,
+  View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { colors } from '../../constants/colors';
+import { theme } from '../../constants/theme';
 import { useAuth } from '../../hooks/useAuth';
+import Button from '../../components/common/Button';
 
-type Props = { navigation: any };
-
-export default function RegisterScreen({ navigation }: Props) {
-  const { login } = useAuth();
+export default function RegisterScreen() {
+  const navigation = useNavigation<any>();
+  const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [mode, setMode] = useState<'personal' | 'business'>('personal');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleRegister = async () => {
-    if (!name.trim() || !email.trim() || !password) {
-      setError('Tüm alanları doldurun');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Şifre en az 6 karakter olmalı');
-      return;
-    }
-    setLoading(true);
-    setError('');
+    if (!name || !email || !password) { setError('Tüm alanlar zorunludur'); return; }
+    setLoading(true); setError('');
     try {
-      // TODO: gerçek API çağrısı
-      // const res = await api.post('/auth/register', { name, email, password });
-      // login(res.data.token, null, res.data.user);  // mode null → ModeSelect göster
-      await new Promise(r => setTimeout(r, 800));
-      login('mock-token', null, { name, email });
-    } catch (e: any) {
-      setError(e.message || 'Kayıt başarısız, tekrar deneyin');
+      await register({ name, email, password, mode });
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Kayıt başarısız');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        {/* Logo */}
-        <View style={styles.logoArea}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoLetter}>F</Text>
-          </View>
-          <Text style={styles.logoText}>FinnAI</Text>
-          <Text style={styles.logoSub}>Hesap oluştur ve başla</Text>
-        </View>
+    <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Kayıt Ol</Text>
+        <Text style={styles.subtitle}>Hesabınızı oluşturun</Text>
 
-        {/* Form */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Kayıt Ol</Text>
-
-          {error ? (
-            <View style={styles.errorBox}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : null}
-
-          <Text style={styles.label}>Ad Soyad</Text>
+        <View style={styles.form}>
+          <TextInput style={styles.input} placeholder="Ad Soyad" value={name} onChangeText={setName} />
           <TextInput
-            style={styles.input}
-            placeholder="Adınız Soyadınız"
-            placeholderTextColor={colors.textLight}
-            value={name}
-            onChangeText={t => { setName(t); setError(''); }}
-            autoCapitalize="words"
+            style={styles.input} placeholder="E-posta"
+            value={email} onChangeText={setEmail}
+            keyboardType="email-address" autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input} placeholder="Şifre"
+            value={password} onChangeText={setPassword}
+            secureTextEntry
           />
 
-          <Text style={styles.label}>E-posta</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="ornek@email.com"
-            placeholderTextColor={colors.textLight}
-            value={email}
-            onChangeText={t => { setEmail(t); setError(''); }}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-
-          <Text style={styles.label}>Şifre</Text>
-          <View style={styles.passwordRow}>
-            <TextInput
-              style={[styles.input, styles.passwordInput]}
-              placeholder="En az 6 karakter"
-              placeholderTextColor={colors.textLight}
-              value={password}
-              onChangeText={t => { setPassword(t); setError(''); }}
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity
-              style={styles.eyeBtn}
-              onPress={() => setShowPassword(v => !v)}
-            >
-              <Text style={styles.eyeText}>{showPassword ? '🙈' : '👁️'}</Text>
-            </TouchableOpacity>
+          <Text style={styles.modeLabel}>Kullanım Modu</Text>
+          <View style={styles.modeRow}>
+            {(['personal', 'business'] as const).map((m) => (
+              <TouchableOpacity
+                key={m}
+                style={[styles.modeBtn, mode === m && styles.modeBtnActive]}
+                onPress={() => setMode(m)}
+              >
+                <Text style={[styles.modeBtnText, mode === m && styles.modeBtnTextActive]}>
+                  {m === 'personal' ? 'Kişisel' : 'İşletme'}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
-          <TouchableOpacity
-            style={[styles.btn, loading && styles.btnDisabled]}
-            onPress={handleRegister}
-            disabled={loading}
-            activeOpacity={0.85}
-          >
-            {loading
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.btnText}>Hesap Oluştur</Text>
-            }
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.linkRow}
-            onPress={() => navigation.navigate('Login')}
-          >
-            <Text style={styles.linkText}>
-              Zaten hesabın var mı?{' '}
-              <Text style={styles.linkBold}>Giriş Yap</Text>
-            </Text>
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+          <Button title="Kayıt Ol" onPress={handleRegister} loading={loading} />
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={styles.link}>Hesabın var mı? Giriş Yap</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: colors.background },
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 40,
-  },
-  logoArea: { alignItems: 'center', marginBottom: 32 },
-  logoCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 20,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  logoLetter: { fontSize: 36, fontWeight: '800', color: '#fff' },
-  logoText: { fontSize: 28, fontWeight: '800', color: colors.text, letterSpacing: -0.5 },
-  logoSub: { fontSize: 14, color: colors.textSecondary, marginTop: 4 },
-
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    elevation: 3,
-  },
-  cardTitle: { fontSize: 22, fontWeight: '700', color: colors.text, marginBottom: 20 },
-
-  errorBox: {
-    backgroundColor: colors.errorLight,
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
-  },
-  errorText: { color: colors.error, fontSize: 13, fontWeight: '500' },
-
-  label: { fontSize: 13, fontWeight: '600', color: colors.textSecondary, marginBottom: 6 },
+  flex: { flex: 1 },
+  container: { flex: 1, backgroundColor: colors.background, justifyContent: 'center', padding: theme.spacing.lg },
+  title: { fontSize: 32, fontWeight: '800', color: colors.primary, textAlign: 'center' },
+  subtitle: { ...theme.typography.body, color: colors.text.secondary, textAlign: 'center', marginBottom: theme.spacing.xl },
+  form: { gap: theme.spacing.md },
   input: {
-    backgroundColor: colors.background,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: colors.text,
-    marginBottom: 16,
+    backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border,
+    borderRadius: theme.borderRadius.md, padding: theme.spacing.md, fontSize: 15,
   },
-  passwordRow: { position: 'relative' },
-  passwordInput: { paddingRight: 48 },
-  eyeBtn: { position: 'absolute', right: 14, top: 12 },
-  eyeText: { fontSize: 18 },
-
-  btn: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 4,
-    marginBottom: 16,
+  modeLabel: { fontWeight: '600', color: colors.text.primary, fontSize: 14 },
+  modeRow: { flexDirection: 'row', gap: theme.spacing.sm },
+  modeBtn: {
+    flex: 1, padding: theme.spacing.md, borderRadius: theme.borderRadius.md,
+    borderWidth: 1.5, borderColor: colors.border, alignItems: 'center',
   },
-  btnDisabled: { opacity: 0.6 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-
-  linkRow: { alignItems: 'center' },
-  linkText: { fontSize: 14, color: colors.textSecondary },
-  linkBold: { color: colors.primary, fontWeight: '700' },
+  modeBtnActive: { backgroundColor: colors.primary, borderColor: colors.primary },
+  modeBtnText: { fontSize: 15, fontWeight: '600', color: colors.text.secondary },
+  modeBtnTextActive: { color: '#fff' },
+  error: { color: colors.danger, fontSize: 13, textAlign: 'center' },
+  link: { ...theme.typography.body, color: colors.primary, textAlign: 'center', marginTop: theme.spacing.sm },
 });

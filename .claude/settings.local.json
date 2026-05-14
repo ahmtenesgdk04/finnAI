@@ -9,7 +9,16 @@
       "Bash(git commit *)",
       "Bash(npx expo *)",
       "Bash(npm install *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git stash *)",
+      "Bash(git cherry-pick *)",
+      "Bash(git clean *)",
+      "Bash(git reset *)",
+      "Bash(del \"c:\\\\Users\\\\MSI KATANA 17\\\\Desktop\\\\finnAI\\\\mobile\\\\src\\\\hooks\\\\useAuth.ts\")",
+      "Bash(git rm *)",
+      "Bash(git merge *)",
+      "Bash(git branch *)"
     ]
   }
 }

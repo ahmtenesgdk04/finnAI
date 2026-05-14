@@ -1,30 +1,32 @@
 export const colors = {
-  primary: '#1A56DB',
+  primary: '#1B4FD8',
   primaryDark: '#1E40AF',
   primaryLight: '#EFF6FF',
-
-  secondary: '#16A34A',
+  secondary: '#10B981',
   accent: '#F59E0B',
-
-  background: '#F8FAFC',
-  surface: '#FFFFFF',
-
-  text: '#0F172A',
-  textSecondary: '#475569',
-  textLight: '#94A3B8',
-
-  border: '#E2E8F0',
-  borderFocus: '#1A56DB',
-
+  danger: '#EF4444',
   error: '#EF4444',
   errorLight: '#FEF2F2',
   success: '#10B981',
   successLight: '#F0FDF4',
   warning: '#F59E0B',
   warningLight: '#FFFBEB',
-
-  business: '#1A56DB',
+  background: '#F8FAFC',
+  surface: '#FFFFFF',
+  card: '#FFFFFF',
+  border: '#E2E8F0',
+  borderFocus: '#1B4FD8',
+  text: {
+    primary: '#1E293B',
+    secondary: '#64748B',
+    muted: '#94A3B8',
+    inverse: '#FFFFFF',
+  },
+  textSecondary: '#64748B',
+  textLight: '#94A3B8',
+  business: '#1B4FD8',
   businessLight: '#EFF6FF',
-  personal: '#7C3AED',
+  personal: '#8B5CF6',
   personalLight: '#F5F3FF',
+  chart: ['#1B4FD8', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#F97316', '#84CC16'],
 };

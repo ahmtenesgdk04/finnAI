@@ -1,15 +1,19 @@
 const jwt = require('jsonwebtoken');
+const { errorResponse } = require('../utils/helpers');
 
-module.exports = (req, res, next) => {
+const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer '))
-    return res.status(401).json({ error: 'Token gerekli' });
-
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return errorResponse(res, 'Token gerekli', 401);
+  }
+  const token = authHeader.split(' ')[1];
   try {
-    const token = authHeader.split(' ')[1];
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
     next();
   } catch {
-    res.status(401).json({ error: 'Geçersiz veya süresi dolmuş token' });
+    return errorResponse(res, 'Geçersiz veya süresi dolmuş token', 401);
   }
 };
+
+module.exports = { verifyToken };

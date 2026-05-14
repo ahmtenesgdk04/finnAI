@@ -1,120 +1,103 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
-import { useAuth } from '../hooks/useAuth';
 
-const Tab = createBottomTabNavigator();
+import DashboardScreen from '../screens/personal/DashboardScreen';
+import BudgetScreen from '../screens/personal/BudgetScreen';
+import CoachScreen from '../screens/personal/CoachScreen';
+import SavingsGoalsScreen from '../screens/personal/SavingsGoalsScreen';
+import SubscriptionsScreen from '../screens/personal/SubscriptionsScreen';
+import DebtTrackerScreen from '../screens/personal/DebtTrackerScreen';
+import InstallmentsScreen from '../screens/personal/InstallmentsScreen';
+import NotesScreen from '../screens/personal/NotesScreen';
+import ShopCheckScreen from '../screens/personal/ShopCheckScreen';
+import HealthScoreScreen from '../screens/shared/HealthScoreScreen';
+import ExchangeRatesScreen from '../screens/shared/ExchangeRatesScreen';
 
-function PersonalDashboard() {
-  const { logout, user } = useAuth();
+export type PersonalTabParamList = {
+  Dashboard: undefined;
+  Budget: undefined;
+  Coach: undefined;
+  Goals: undefined;
+  Tools: undefined;
+};
+
+export type ToolsStackParamList = {
+  ToolsMenu: undefined;
+  Subscriptions: undefined;
+  Debt: undefined;
+  Installments: undefined;
+  Notes: undefined;
+  ShopCheck: undefined;
+  HealthScore: undefined;
+  ExchangeRates: undefined;
+};
+
+const Tab = createBottomTabNavigator<PersonalTabParamList>();
+const ToolsStack = createNativeStackNavigator<ToolsStackParamList>();
+
+function ToolsNavigator() {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Hoş geldin 👋</Text>
-          <Text style={styles.name}>{user?.name || 'Kullanıcı'}</Text>
-        </View>
-        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-          <Text style={styles.logoutText}>Çıkış</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.modeTag}>
-        <Text style={styles.modeTagText}>👤 Kişisel Mod</Text>
-      </View>
-
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderEmoji}>💰</Text>
-        <Text style={styles.placeholderTitle}>Kişisel Dashboard</Text>
-        <Text style={styles.placeholderSub}>
-          Gün 5'te: BütçePilot, FinansKoç,{'\n'}Tasarruf Hedefleri ve daha fazlası
-        </Text>
-      </View>
-    </SafeAreaView>
+    <ToolsStack.Navigator>
+      <ToolsStack.Screen name="ToolsMenu" component={SubscriptionsScreen} options={{ title: 'Abonelikler' }} />
+      <ToolsStack.Screen name="Subscriptions" component={SubscriptionsScreen} options={{ title: 'Abonelikler' }} />
+      <ToolsStack.Screen name="Debt" component={DebtTrackerScreen} options={{ title: 'Borçlarım' }} />
+      <ToolsStack.Screen name="Installments" component={InstallmentsScreen} options={{ title: 'Taksitler' }} />
+      <ToolsStack.Screen name="Notes" component={NotesScreen} options={{ title: 'Notlar' }} />
+      <ToolsStack.Screen name="ShopCheck" component={ShopCheckScreen} options={{ title: 'GüvenliAlış' }} />
+      <ToolsStack.Screen name="HealthScore" component={HealthScoreScreen} options={{ title: 'Finansal Sağlık' }} />
+      <ToolsStack.Screen name="ExchangeRates" component={ExchangeRatesScreen} options={{ title: 'Döviz' }} />
+    </ToolsStack.Navigator>
   );
 }
 
-function PlaceholderScreen({ title }: { title: string }) {
-  return (
-    <View style={styles.centered}>
-      <Text style={styles.placeholderTitle}>{title}</Text>
-      <Text style={styles.placeholderSub}>Yakında gelecek</Text>
-    </View>
-  );
-}
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
+const TAB_ICONS: Record<string, { active: IoniconName; inactive: IoniconName }> = {
+  Dashboard: { active: 'home', inactive: 'home-outline' },
+  Budget: { active: 'wallet', inactive: 'wallet-outline' },
+  Coach: { active: 'school', inactive: 'school-outline' },
+  Goals: { active: 'flag', inactive: 'flag-outline' },
+  Tools: { active: 'apps', inactive: 'apps-outline' },
+};
+
+const TAB_LABELS: Record<string, string> = {
+  Dashboard: 'Ana Sayfa',
+  Budget: 'Bütçe',
+  Coach: 'Koç',
+  Goals: 'Hedefler',
+  Tools: 'Araçlar',
+};
 
 export default function PersonalTabNavigator() {
   return (
     <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          const icons = TAB_ICONS[route.name];
+          return <Ionicons name={focused ? icons.active : icons.inactive} size={size} color={color} />;
+        },
         tabBarActiveTintColor: colors.personal,
-        tabBarInactiveTintColor: colors.textLight,
-        tabBarStyle: { borderTopWidth: 1, borderTopColor: colors.border, paddingBottom: 4 },
-      }}
+        tabBarInactiveTintColor: colors.text.muted,
+        tabBarLabel: TAB_LABELS[route.name],
+        tabBarStyle: {
+          borderTopWidth: 1,
+          borderTopColor: colors.border,
+          paddingBottom: 8,
+          paddingTop: 4,
+          height: 60,
+        },
+        headerStyle: { backgroundColor: colors.card },
+        headerTitleStyle: { color: colors.text.primary, fontWeight: '600' },
+      })}
     >
-      <Tab.Screen
-        name="Ana Sayfa"
-        component={PersonalDashboard}
-        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} /> }}
-      />
-      <Tab.Screen
-        name="Harcamalar"
-        component={() => <PlaceholderScreen title="Harcama Takibi" />}
-        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="wallet-outline" size={size} color={color} /> }}
-      />
-      <Tab.Screen
-        name="Koç"
-        component={() => <PlaceholderScreen title="FinansKoç" />}
-        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="school-outline" size={size} color={color} /> }}
-      />
-      <Tab.Screen
-        name="Ayarlar"
-        component={() => <PlaceholderScreen title="Ayarlar" />}
-        options={{ tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} /> }}
-      />
+      <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Ana Sayfa', headerShown: false }} />
+      <Tab.Screen name="Budget" component={BudgetScreen} options={{ title: 'Bütçe' }} />
+      <Tab.Screen name="Coach" component={CoachScreen} options={{ title: 'FinansKoç' }} />
+      <Tab.Screen name="Goals" component={SavingsGoalsScreen} options={{ title: 'Hedefler' }} />
+      <Tab.Screen name="Tools" component={ToolsNavigator} options={{ title: 'Araçlar', headerShown: false }} />
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  greeting: { fontSize: 13, color: colors.textSecondary },
-  name: { fontSize: 18, fontWeight: '700', color: colors.text },
-  logoutBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-  },
-  logoutText: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
-  modeTag: {
-    marginHorizontal: 24,
-    marginTop: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: colors.personalLight,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  modeTagText: { fontSize: 13, fontWeight: '600', color: colors.personal },
-  placeholder: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
-  placeholderEmoji: { fontSize: 56, marginBottom: 16 },
-  placeholderTitle: { fontSize: 20, fontWeight: '700', color: colors.text, marginBottom: 8 },
-  placeholderSub: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
-});

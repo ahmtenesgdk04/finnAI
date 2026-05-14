@@ -7,7 +7,6 @@ import { useAuth } from '../hooks/useAuth';
 
 const Tab = createBottomTabNavigator();
 
-// İşletme dashboard placeholder — Gün 3'te gerçek implementasyon
 function BusinessDashboard() {
   const { logout, user } = useAuth();
   return (
@@ -30,7 +29,7 @@ function BusinessDashboard() {
         <Text style={styles.placeholderEmoji}>🚀</Text>
         <Text style={styles.placeholderTitle}>İşletme Dashboard'u</Text>
         <Text style={styles.placeholderSub}>
-          Gün 3'te: Akıllı Gider Analizi, NakitRadar,{'\n'}TahsilatAI ve daha fazlası
+          Akıllı Gider Analizi, NakitRadar,{'\n'}TahsilatAI ve daha fazlası
         </Text>
       </View>
     </SafeAreaView>
@@ -52,7 +51,7 @@ export default function BusinessTabNavigator() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.business,
-        tabBarInactiveTintColor: colors.textLight,
+        tabBarInactiveTintColor: colors.text.muted,
         tabBarStyle: {
           borderTopWidth: 1,
           borderTopColor: colors.border,
@@ -64,36 +63,28 @@ export default function BusinessTabNavigator() {
         name="Ana Sayfa"
         component={BusinessDashboard}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
         name="İşlemler"
         component={() => <PlaceholderScreen title="Gelir & Gider" />}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="swap-horizontal-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="swap-horizontal-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
         name="AI Araçlar"
         component={() => <PlaceholderScreen title="AI Modüller" />}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="sparkles-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="sparkles-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
         name="Ayarlar"
         component={() => <PlaceholderScreen title="Ayarlar" />}
         options={{
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}
       />
     </Tab.Navigator>
@@ -109,12 +100,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 12,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.card,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  greeting: { fontSize: 13, color: colors.textSecondary },
-  name: { fontSize: 18, fontWeight: '700', color: colors.text },
+  greeting: { fontSize: 13, color: colors.text.secondary },
+  name: { fontSize: 18, fontWeight: '700', color: colors.text.primary },
   logoutBtn: {
     paddingHorizontal: 14,
     paddingVertical: 6,
@@ -122,7 +113,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.border,
   },
-  logoutText: { fontSize: 13, color: colors.textSecondary, fontWeight: '600' },
+  logoutText: { fontSize: 13, color: colors.text.secondary, fontWeight: '600' },
   modeTag: {
     marginHorizontal: 24,
     marginTop: 16,
@@ -135,6 +126,6 @@ const styles = StyleSheet.create({
   modeTagText: { fontSize: 13, fontWeight: '600', color: colors.business },
   placeholder: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 40 },
   placeholderEmoji: { fontSize: 56, marginBottom: 16 },
-  placeholderTitle: { fontSize: 20, fontWeight: '700', color: colors.text, marginBottom: 8 },
-  placeholderSub: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 22 },
+  placeholderTitle: { fontSize: 20, fontWeight: '700', color: colors.text.primary, marginBottom: 8 },
+  placeholderSub: { fontSize: 14, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 },
 });
