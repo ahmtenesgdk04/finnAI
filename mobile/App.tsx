@@ -1,16 +1,21 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { AuthProvider } from './src/hooks/useAuth';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AppNavigator from './src/navigation/AppNavigator';
+import { AuthContext, useAuthProvider } from './src/hooks/useAuth';
+
+function AuthProvider({ children }: { children: React.ReactNode }) {
+  const auth = useAuthProvider();
+  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+}
 
 export default function App() {
   return (
-    <AuthProvider>
-      <NavigationContainer>
-        <StatusBar style="dark" />
+    <SafeAreaProvider>
+      <StatusBar style="dark" />
+      <AuthProvider>
         <AppNavigator />
-      </NavigationContainer>
-    </AuthProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }

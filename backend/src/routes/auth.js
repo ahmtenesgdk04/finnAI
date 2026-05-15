@@ -1,10 +1,10 @@
 const router = require('express').Router();
-const authController = require('../controllers/authController');
-const authMiddleware = require('../middleware/auth');
+const { register, login, getMe } = require('../controllers/authController');
+const { verifyToken } = require('../middleware/auth');
+const { authLimiter } = require('../middleware/rateLimiter');
 
-router.post('/register', authController.register);
-router.post('/login', authController.login);
-router.get('/me', authMiddleware, authController.getMe);
-router.patch('/mode', authMiddleware, authController.updateMode);
+router.post('/register', authLimiter, register);
+router.post('/login', authLimiter, login);
+router.get('/me', verifyToken, getMe);
 
 module.exports = router;
