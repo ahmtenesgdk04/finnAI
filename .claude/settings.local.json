@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git checkout *)",
+      "Bash(cd \"c:\\\\Users\\\\MSI KATANA 17\\\\Desktop\\\\finnAI\" && mkdir -p backend/src/config backend/src/routes backend/src/controllers backend/src/services backend/src/models backend/src/middleware backend/src/utils 2>&1)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(npx expo *)",
+      "Bash(npm install *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git stash *)",
+      "Bash(git cherry-pick *)",
+      "Bash(git clean *)",
+      "Bash(git reset *)",
+      "Bash(del \"c:\\\\Users\\\\MSI KATANA 17\\\\Desktop\\\\finnAI\\\\mobile\\\\src\\\\hooks\\\\useAuth.ts\")",
+      "Bash(git rm *)",
+      "Bash(git merge *)",
+      "Bash(git branch *)"
+    ]
+  }
+}
