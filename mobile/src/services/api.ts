@@ -37,9 +37,13 @@ export const authAPI = {
 
 export const personalAPI = {
   addEntry: (data: { amount: number; category: string; date: string; note?: string }) =>
-    api.post('/api/budget/entry', data),
+    api.post('/api/expenses', data),
   getSummary: (month: string) =>
-    api.get(`/api/budget/summary?month=${month}`),
+    api.get(`/api/expenses/summary?month=${month}`),
+  suggestCategory: (note: string, amount: number) =>
+    api.post('/api/expenses/suggest-category', { note, amount }),
+  analyzeExpenses: (month?: string) =>
+    api.get(`/api/expenses/analyze${month ? `?month=${month}` : ''}`),
   analyzeBudget: () =>
     api.post('/api/budget/analyze'),
   setLimit: (data: { category: string; monthlyLimit: number }) =>

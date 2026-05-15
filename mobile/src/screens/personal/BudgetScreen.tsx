@@ -128,8 +128,14 @@ export default function BudgetScreen() {
       <Modal visible={showAnalysis} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheet}>
-            <Text style={styles.modalTitle}>AI Bütçe Analizi</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="sparkles" size={18} color={colors.personal} />
+              <Text style={styles.modalTitle}>AI Bütçe Analizi</Text>
+            </View>
             <Text style={styles.modalText}>{analysisText}</Text>
+            <Text style={{ fontSize: 11, color: colors.text.muted, textAlign: 'right', fontStyle: 'italic' }}>
+              Gemini ile analiz edildi
+            </Text>
             <Button title="Kapat" onPress={() => setShowAnalysis(false)} />
           </View>
         </View>

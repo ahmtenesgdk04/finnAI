@@ -1,6 +1,6 @@
 const budgetModel = require('../models/budgetModel');
 const expenseModel = require('../models/expenseModel');
-const aiService = require('./aiService');
+const geminiService = require('./geminiService');
 const inflationService = require('./inflationService');
 const { monthRange, formatMonth } = require('../utils/helpers');
 
@@ -29,7 +29,7 @@ const analyzeBudget = async (userId) => {
 
   const currentMonth = formatMonth();
   const inflationData = inflationService.getMonthlyInflation(currentMonth);
-  const insight = await aiService.analyzeBudget(monthlyData, inflationData);
+  const insight = await geminiService.analyzeBudget(monthlyData, inflationData);
   return { insight, months: monthlyData };
 };
 

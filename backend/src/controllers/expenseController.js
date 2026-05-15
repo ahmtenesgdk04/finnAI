@@ -1,4 +1,5 @@
 const expenseService = require('../services/expenseService');
+const geminiService = require('../services/geminiService');
 const { formatMonth } = require('../utils/helpers');
 
 const addEntry = async (req, res, next) => {
@@ -24,4 +25,30 @@ const getSummary = async (req, res, next) => {
   }
 };
 
-module.exports = { addEntry, getSummary };
+const suggestCategory = async (req, res, next) => {
+  try {
+    const { note, amount } = req.body;
+    if (!note) return res.status(400).json({ success: false, message: 'Not zorunludur' });
+    const category = await geminiService.suggestCategory(note, amount || 0);
+    res.json({ success: true, category });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const analyzeExpenses = async (req, res, next) => {
+  try {
+    const month = req.query.month || formatMonth();
+    const summary = await expenseService.getSummary(req.user.id, month);
+    const insight = await geminiService.analyzeExpenses(
+      summary.entries || [],
+      summary.total || 0,
+      summary.budget || 10000
+    );
+    res.json({ success: true, insight });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { addEntry, getSummary, suggestCategory, analyzeExpenses };

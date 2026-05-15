@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, TextInput, Modal,
-  StyleSheet, Alert, RefreshControl,
+  StyleSheet, Alert, RefreshControl, ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../constants/colors';
@@ -17,9 +17,13 @@ const CATEGORIES = ['Market', 'Kira', 'Fatura', 'Sağlık', 'Eğlence', 'Ulaşı
 export default function ExpenseTrackerScreen() {
   const [showForm, setShowForm] = useState(false);
   const [showCatModal, setShowCatModal] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [analysisText, setAnalysisText] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [note, setNote] = useState('');
+  const [suggesting, setSuggesting] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
 
   const month = formatMonth();
   const { data: summary, loading, refetch } = useApi(
@@ -53,6 +57,35 @@ export default function ExpenseTrackerScreen() {
     }
   };
 
+  const handleSuggestCategory = async () => {
+    if (!note.trim()) {
+      Alert.alert('Uyarı', 'Kategori önerisi için önce not girin');
+      return;
+    }
+    setSuggesting(true);
+    try {
+      const res = await personalAPI.suggestCategory(note, parseFloat(amount) || 0);
+      setCategory((res as any).data.category);
+    } catch {
+      Alert.alert('Hata', 'Kategori önerilemedi');
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
+  const handleAnalyzeExpenses = async () => {
+    setAnalyzing(true);
+    try {
+      const res = await personalAPI.analyzeExpenses(month);
+      setAnalysisText((res as any).data.insight || 'Analiz tamamlandı.');
+      setShowAnalysis(true);
+    } catch {
+      Alert.alert('Hata', 'Analiz yapılamadı');
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.summaryBar}>
@@ -67,9 +100,16 @@ export default function ExpenseTrackerScreen() {
             {formatCurrency(budget - total)}
           </Text>
         </View>
-        <TouchableOpacity style={styles.addBtn} onPress={() => setShowForm(true)}>
-          <Ionicons name="add" size={28} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.barActions}>
+          <TouchableOpacity style={styles.analyzeBtn} onPress={handleAnalyzeExpenses} disabled={analyzing}>
+            {analyzing
+              ? <ActivityIndicator size="small" color={colors.personal} />
+              : <Ionicons name="sparkles-outline" size={20} color={colors.personal} />}
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.addBtn} onPress={() => setShowForm(true)}>
+            <Ionicons name="add" size={28} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -99,6 +139,7 @@ export default function ExpenseTrackerScreen() {
         )}
       />
 
+      {/* Harcama Ekle Modal */}
       <Modal visible={showForm} transparent animationType="slide">
         <View style={styles.overlay}>
           <View style={styles.sheet}>
@@ -115,23 +156,45 @@ export default function ExpenseTrackerScreen() {
               value={amount}
               onChangeText={setAmount}
             />
+
+            {/* Not + AI öneri butonu */}
+            <View style={styles.noteRow}>
+              <TextInput
+                style={[styles.input, styles.noteInput]}
+                placeholder="Not (opsiyonel)"
+                value={note}
+                onChangeText={setNote}
+              />
+              <TouchableOpacity
+                style={[styles.sparkleBtn, suggesting && { opacity: 0.6 }]}
+                onPress={handleSuggestCategory}
+                disabled={suggesting}
+              >
+                {suggesting
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Ionicons name="sparkles" size={18} color="#fff" />}
+              </TouchableOpacity>
+            </View>
+            {category ? (
+              <Text style={styles.suggestedLabel}>
+                {suggesting ? 'Öneriyor...' : `Kategori: ${category}`}
+              </Text>
+            ) : (
+              <Text style={styles.hintText}>✨ Notu yazıp ışıltı butonuna bas, Gemini kategori önersin</Text>
+            )}
+
             <TouchableOpacity style={styles.catSelect} onPress={() => setShowCatModal(true)}>
               <Text style={[styles.catSelectText, !category && { color: colors.text.muted }]}>
                 {category || 'Kategori Seç'}
               </Text>
               <Ionicons name="chevron-down" size={18} color={colors.text.secondary} />
             </TouchableOpacity>
-            <TextInput
-              style={styles.input}
-              placeholder="Not (opsiyonel)"
-              value={note}
-              onChangeText={setNote}
-            />
             <Button title="Kaydet" onPress={handleAdd} loading={adding} />
           </View>
         </View>
       </Modal>
 
+      {/* Kategori Seçim Modal */}
       <Modal visible={showCatModal} transparent animationType="fade">
         <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setShowCatModal(false)}>
           <View style={styles.catSheet}>
@@ -146,6 +209,26 @@ export default function ExpenseTrackerScreen() {
             ))}
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      {/* Gemini Analiz Modal */}
+      <Modal visible={showAnalysis} transparent animationType="slide">
+        <View style={styles.overlay}>
+          <View style={styles.analysisSheet}>
+            <View style={styles.sheetHeader}>
+              <View style={styles.analysisTitle}>
+                <Ionicons name="sparkles" size={18} color={colors.personal} />
+                <Text style={styles.sheetTitle}>Harcama Analizi</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowAnalysis(false)}>
+                <Ionicons name="close" size={24} color={colors.text.secondary} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.analysisText}>{analysisText}</Text>
+            <Text style={styles.poweredBy}>Gemini ile analiz edildi</Text>
+            <Button title="Kapat" onPress={() => setShowAnalysis(false)} />
+          </View>
+        </View>
       </Modal>
     </View>
   );
@@ -164,24 +247,22 @@ const styles = StyleSheet.create({
   summaryLabel: { fontSize: 12, color: colors.text.secondary },
   summaryValue: { fontSize: 20, fontWeight: '700', color: colors.text.primary },
   divider: { width: 1, height: 40, backgroundColor: colors.border },
+  barActions: { marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 8 },
+  analyzeBtn: {
+    width: 40, height: 40, borderRadius: 20,
+    borderWidth: 1.5, borderColor: colors.personal,
+    alignItems: 'center', justifyContent: 'center',
+  },
   addBtn: {
-    marginLeft: 'auto',
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 48, height: 48, borderRadius: 24,
     backgroundColor: colors.personal,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'center', justifyContent: 'center',
   },
   list: { padding: theme.spacing.md, gap: theme.spacing.sm, paddingBottom: 32 },
   entryCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.card,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    gap: theme.spacing.sm,
-    ...theme.shadow.card,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.card,
+    borderRadius: theme.borderRadius.md, padding: theme.spacing.md,
+    gap: theme.spacing.sm, ...theme.shadow.card,
   },
   entryCat: {
     width: 40, height: 40, borderRadius: 20,
@@ -199,13 +280,28 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: theme.spacing.lg, paddingBottom: 40, gap: theme.spacing.md,
   },
+  analysisSheet: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    padding: theme.spacing.lg, paddingBottom: 40, gap: theme.spacing.md,
+  },
   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  analysisTitle: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   sheetTitle: { ...theme.typography.h3, color: colors.text.primary },
   input: {
     backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border,
     borderRadius: theme.borderRadius.md, padding: theme.spacing.md,
     fontSize: 15, color: colors.text.primary,
   },
+  noteRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+  noteInput: { flex: 1 },
+  sparkleBtn: {
+    width: 46, height: 46, borderRadius: theme.borderRadius.md,
+    backgroundColor: colors.personal,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  suggestedLabel: { fontSize: 13, fontWeight: '600', color: colors.personal },
+  hintText: { fontSize: 12, color: colors.text.muted },
   catSelect: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border,
@@ -222,4 +318,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: colors.border,
   },
   catItemText: { ...theme.typography.body, color: colors.text.primary },
+  analysisText: { ...theme.typography.body, color: colors.text.secondary, lineHeight: 24 },
+  poweredBy: { fontSize: 11, color: colors.text.muted, textAlign: 'right', fontStyle: 'italic' },
 });
