@@ -21,13 +21,22 @@ const getLimits = async (userId) => {
 };
 
 // Birikim hedefleri
+const mapGoal = (row) => ({
+  id: row.id,
+  name: row.name,
+  targetAmount: parseFloat(row.target_amount),
+  currentAmount: parseFloat(row.current_amount),
+  targetDate: row.target_date,
+  createdAt: row.created_at,
+});
+
 const createGoal = async ({ userId, name, targetAmount, targetDate, currentAmount }) => {
   const { rows } = await db.query(
     `INSERT INTO savings_goals (user_id, name, target_amount, current_amount, target_date)
      VALUES ($1, $2, $3, $4, $5) RETURNING *`,
     [userId, name, targetAmount, currentAmount || 0, targetDate]
   );
-  return rows[0];
+  return mapGoal(rows[0]);
 };
 
 const getGoals = async (userId) => {
@@ -35,7 +44,7 @@ const getGoals = async (userId) => {
     'SELECT * FROM savings_goals WHERE user_id = $1 ORDER BY created_at DESC',
     [userId]
   );
-  return rows;
+  return rows.map(mapGoal);
 };
 
 const updateGoal = async (id, userId, fields) => {
@@ -52,7 +61,7 @@ const updateGoal = async (id, userId, fields) => {
     `UPDATE savings_goals SET ${sets.join(', ')} WHERE id = $${i} AND user_id = $${i + 1} RETURNING *`,
     vals
   );
-  return rows[0] || null;
+  return rows[0] ? mapGoal(rows[0]) : null;
 };
 
 const deleteGoal = async (id, userId) => {

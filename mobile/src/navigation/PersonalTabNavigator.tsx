@@ -2,12 +2,14 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../constants/colors';
 
 import DashboardScreen from '../screens/personal/DashboardScreen';
 import BudgetScreen from '../screens/personal/BudgetScreen';
 import CoachScreen from '../screens/personal/CoachScreen';
 import SavingsGoalsScreen from '../screens/personal/SavingsGoalsScreen';
+import ToolsMenuScreen from '../screens/personal/ToolsMenuScreen';
 import SubscriptionsScreen from '../screens/personal/SubscriptionsScreen';
 import DebtTrackerScreen from '../screens/personal/DebtTrackerScreen';
 import InstallmentsScreen from '../screens/personal/InstallmentsScreen';
@@ -41,7 +43,7 @@ const ToolsStack = createNativeStackNavigator<ToolsStackParamList>();
 function ToolsNavigator() {
   return (
     <ToolsStack.Navigator>
-      <ToolsStack.Screen name="ToolsMenu" component={SubscriptionsScreen} options={{ title: 'Abonelikler' }} />
+      <ToolsStack.Screen name="ToolsMenu" component={ToolsMenuScreen} options={{ title: 'Araçlar' }} />
       <ToolsStack.Screen name="Subscriptions" component={SubscriptionsScreen} options={{ title: 'Abonelikler' }} />
       <ToolsStack.Screen name="Debt" component={DebtTrackerScreen} options={{ title: 'Borçlarım' }} />
       <ToolsStack.Screen name="Installments" component={InstallmentsScreen} options={{ title: 'Taksitler' }} />
@@ -72,6 +74,7 @@ const TAB_LABELS: Record<string, string> = {
 };
 
 export default function PersonalTabNavigator() {
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -85,9 +88,9 @@ export default function PersonalTabNavigator() {
         tabBarStyle: {
           borderTopWidth: 1,
           borderTopColor: colors.border,
-          paddingBottom: 8,
+          paddingBottom: insets.bottom + 4,
           paddingTop: 4,
-          height: 60,
+          height: 60 + insets.bottom,
         },
         headerStyle: { backgroundColor: colors.card },
         headerTitleStyle: { color: colors.text.primary, fontWeight: '600' },
