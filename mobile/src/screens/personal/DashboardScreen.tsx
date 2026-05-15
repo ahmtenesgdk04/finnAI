@@ -15,7 +15,7 @@ import Card from '../../components/common/Card';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 export default function DashboardScreen() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigation = useNavigation<any>();
   const month = formatMonth();
 
@@ -44,9 +44,14 @@ export default function DashboardScreen() {
             <Text style={styles.greeting}>Merhaba, {user?.name?.split(' ')[0]} 👋</Text>
             <Text style={styles.date}>{formatDate(new Date())}</Text>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate('Tools', { screen: 'HealthScore' })}>
-            <Ionicons name="heart-circle-outline" size={32} color={colors.personal} />
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
+              <Ionicons name="log-out-outline" size={24} color={colors.text.secondary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Tools', { screen: 'HealthScore' })}>
+              <Ionicons name="heart-circle-outline" size={32} color={colors.personal} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Döviz şeridi */}
@@ -138,6 +143,14 @@ const styles = StyleSheet.create({
   },
   greeting: { ...theme.typography.h2, color: colors.text.primary },
   date: { ...theme.typography.caption, color: colors.text.secondary, marginTop: 2 },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+  },
+  logoutBtn: {
+    padding: 4,
+  },
   ratesScroll: { marginHorizontal: -theme.spacing.md, paddingHorizontal: theme.spacing.md },
   rateChip: {
     backgroundColor: colors.card,
