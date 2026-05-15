@@ -8,7 +8,7 @@ const getClient = () => {
   return genAI;
 };
 
-const getModel = () => getClient().getGenerativeModel({ model: 'gemini-1.5-flash' });
+const getModel = () => getClient().getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
 
 const analyzeBudget = async (monthlyData, inflationData) => {
   const prompt = `Sen bir Türk kişisel finans uzmanısın. Kullanıcının son 3 aylık harcama verisini analiz et.
