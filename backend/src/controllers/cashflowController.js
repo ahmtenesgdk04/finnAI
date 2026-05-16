@@ -2,7 +2,8 @@ const cashflowService = require('../services/cashflowService');
 
 const forecast = async (req, res, next) => {
   try {
-    const result = await cashflowService.getForecast(req.user.id);
+    const period = req.body?.period || 'short';
+    const result = await cashflowService.getForecast(req.user.id, period);
     res.json(result);
   } catch (err) {
     next(err);
@@ -36,4 +37,13 @@ const addIncome = async (req, res, next) => {
   }
 };
 
-module.exports = { forecast, summary, addExpense, addIncome };
+const analyzeExpenses = async (req, res, next) => {
+  try {
+    const result = await cashflowService.analyzeExpenses(req.user.id);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { forecast, summary, addExpense, addIncome, analyzeExpenses };

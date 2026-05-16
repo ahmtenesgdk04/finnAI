@@ -7,6 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
 import { useAuth } from '../hooks/useAuth';
 import CashflowScreen from '../screens/business/CashflowScreen';
+import ExpenseAnalysisScreen from '../screens/business/ExpenseAnalysisScreen';
+import CollectionsScreen from '../screens/business/CollectionsScreen';
+import SupplierCheckScreen from '../screens/business/SupplierCheckScreen';
 
 const Tab = createBottomTabNavigator();
 const AIStack = createNativeStackNavigator();
@@ -72,44 +75,47 @@ function AIMenuScreen({ navigation }: { navigation: any }) {
           <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
         </TouchableOpacity>
 
-        <View style={[styles.aiMenuItem, styles.aiMenuItemDisabled]}>
-          <View style={[styles.aiMenuIcon, { backgroundColor: '#F1F5F9' }]}>
-            <Ionicons name="document-text-outline" size={26} color={colors.text.muted} />
+        <TouchableOpacity
+          style={styles.aiMenuItem}
+          onPress={() => navigation.navigate('AkilliGiderAnalizi')}
+        >
+          <View style={[styles.aiMenuIcon, { backgroundColor: '#FEF3C7' }]}>
+            <Ionicons name="document-text-outline" size={26} color={colors.warning} />
           </View>
           <View style={styles.aiMenuText}>
-            <Text style={[styles.aiMenuItemTitle, { color: colors.text.muted }]}>Akıllı Gider Analizi</Text>
-            <Text style={styles.aiMenuItemSub}>Fatura OCR + AI kategorileme</Text>
+            <Text style={styles.aiMenuItemTitle}>Akıllı Gider Analizi</Text>
+            <Text style={styles.aiMenuItemSub}>AI destekli gider optimizasyonu</Text>
           </View>
-          <View style={styles.comingSoon}>
-            <Text style={styles.comingSoonText}>Yakında</Text>
-          </View>
-        </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
+        </TouchableOpacity>
 
-        <View style={[styles.aiMenuItem, styles.aiMenuItemDisabled]}>
-          <View style={[styles.aiMenuIcon, { backgroundColor: '#F1F5F9' }]}>
-            <Ionicons name="people-outline" size={26} color={colors.text.muted} />
+        <TouchableOpacity
+          style={styles.aiMenuItem}
+          onPress={() => navigation.navigate('TahsilatAI')}
+        >
+          <View style={[styles.aiMenuIcon, { backgroundColor: '#FEE2E2' }]}>
+            <Ionicons name="people-outline" size={26} color={colors.danger} />
           </View>
           <View style={styles.aiMenuText}>
-            <Text style={[styles.aiMenuItemTitle, { color: colors.text.muted }]}>TahsilatAI</Text>
+            <Text style={styles.aiMenuItemTitle}>TahsilatAI</Text>
             <Text style={styles.aiMenuItemSub}>Müşteri ödeme skoru + takip</Text>
           </View>
-          <View style={styles.comingSoon}>
-            <Text style={styles.comingSoonText}>Yakında</Text>
-          </View>
-        </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
+        </TouchableOpacity>
 
-        <View style={[styles.aiMenuItem, styles.aiMenuItemDisabled]}>
-          <View style={[styles.aiMenuIcon, { backgroundColor: '#F1F5F9' }]}>
-            <Ionicons name="shield-checkmark-outline" size={26} color={colors.text.muted} />
+        <TouchableOpacity
+          style={styles.aiMenuItem}
+          onPress={() => navigation.navigate('GuvenlIAlis')}
+        >
+          <View style={[styles.aiMenuIcon, { backgroundColor: '#ECFDF5' }]}>
+            <Ionicons name="shield-checkmark-outline" size={26} color={colors.secondary} />
           </View>
           <View style={styles.aiMenuText}>
-            <Text style={[styles.aiMenuItemTitle, { color: colors.text.muted }]}>GüvenliAlış</Text>
+            <Text style={styles.aiMenuItemTitle}>GüvenliAlış</Text>
             <Text style={styles.aiMenuItemSub}>5 katmanlı tedarikçi analizi</Text>
           </View>
-          <View style={styles.comingSoon}>
-            <Text style={styles.comingSoonText}>Yakında</Text>
-          </View>
-        </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -126,6 +132,9 @@ function AIAraclarNavigator() {
     >
       <AIStack.Screen name="AIMenu" component={AIMenuScreen} options={{ title: 'AI Araçlar', headerShown: false }} />
       <AIStack.Screen name="NakitRadar" component={CashflowScreen} options={{ title: 'NakitRadar', headerShown: false }} />
+      <AIStack.Screen name="AkilliGiderAnalizi" component={ExpenseAnalysisScreen} options={{ title: 'Akıllı Gider Analizi', headerShown: false }} />
+      <AIStack.Screen name="TahsilatAI" component={CollectionsScreen} options={{ title: 'TahsilatAI', headerShown: false }} />
+      <AIStack.Screen name="GuvenlIAlis" component={SupplierCheckScreen} options={{ title: 'GüvenliAlış', headerShown: false }} />
     </AIStack.Navigator>
   );
 }

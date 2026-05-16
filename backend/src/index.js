@@ -21,6 +21,8 @@ app.use('/api/exchange-rates', require('./routes/exchangeRates'));
 app.use('/api/expenses', require('./routes/expenses'));
 app.use('/api/calendar', require('./routes/calendar'));
 app.use('/api/cashflow', require('./routes/cashflow'));
+app.use('/api/collection', require('./routes/collections'));
+app.use('/api/supplier', require('./routes/supplier'));
 
 app.get('/health', (req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV }));
 

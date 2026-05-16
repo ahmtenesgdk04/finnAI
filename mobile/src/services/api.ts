@@ -6,7 +6,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://172.29.35.177:3000';
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 15000,
+  timeout: 60000,
 });
 
 api.interceptors.request.use(async (config) => {
@@ -68,12 +68,28 @@ export const personalAPI = {
 export const businessAPI = {
   getCashflowSummary: () =>
     api.get('/api/cashflow/summary'),
-  getForecast: () =>
-    api.post('/api/cashflow/forecast'),
+  getForecast: (period: 'short' | 'medium' | 'long' = 'short') =>
+    api.post('/api/cashflow/forecast', { period }),
   addExpense: (data: { amount: number; category: string; date: string; description?: string }) =>
     api.post('/api/cashflow/expense', data),
   addIncome: (data: { amount: number; source: string; date: string; description?: string }) =>
     api.post('/api/cashflow/income', data),
+  analyzeExpenses: () =>
+    api.post('/api/cashflow/analyze-expenses'),
+
+  getCollections: () =>
+    api.get('/api/collection'),
+  addCollection: (data: { customerName: string; amount: number; dueDate: string }) =>
+    api.post('/api/collection', data),
+  markCollectionPaid: (id: string) =>
+    api.patch(`/api/collection/${id}/paid`),
+  deleteCollection: (id: string) =>
+    api.delete(`/api/collection/${id}`),
+  analyzeCollections: () =>
+    api.post('/api/collection/analyze'),
+
+  analyzeSupplier: (data: { supplierName: string; productType?: string; estimatedAmount?: number }) =>
+    api.post('/api/supplier/analyze', data),
 };
 
 export default api;
