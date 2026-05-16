@@ -69,6 +69,15 @@ export const personalAPI = {
   getExchangeRates: () => api.get('/api/exchange-rates'),
 };
 
-export const businessAPI = {};
+export const businessAPI = {
+  getCashflowSummary: () =>
+    api.get('/api/cashflow/summary'),
+  getForecast: () =>
+    api.post('/api/cashflow/forecast'),
+  addExpense: (data: { amount: number; category: string; date: string; description?: string }) =>
+    api.post('/api/cashflow/expense', data),
+  addIncome: (data: { amount: number; source: string; date: string; description?: string }) =>
+    api.post('/api/cashflow/income', data),
+};
 
 export default api;
