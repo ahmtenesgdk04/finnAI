@@ -17,6 +17,7 @@ import NotesScreen from '../screens/personal/NotesScreen';
 import ShopCheckScreen from '../screens/personal/ShopCheckScreen';
 import HealthScoreScreen from '../screens/shared/HealthScoreScreen';
 import ExchangeRatesScreen from '../screens/shared/ExchangeRatesScreen';
+import ProfileScreen from '../screens/personal/ProfileScreen';
 
 export type PersonalTabParamList = {
   Dashboard: undefined;
@@ -35,6 +36,7 @@ export type ToolsStackParamList = {
   ShopCheck: undefined;
   HealthScore: undefined;
   ExchangeRates: undefined;
+  Profile: undefined;
 };
 
 const Tab = createBottomTabNavigator<PersonalTabParamList>();
@@ -51,6 +53,7 @@ function ToolsNavigator() {
       <ToolsStack.Screen name="ShopCheck" component={ShopCheckScreen} options={{ title: 'GüvenliAlış' }} />
       <ToolsStack.Screen name="HealthScore" component={HealthScoreScreen} options={{ title: 'Finansal Sağlık' }} />
       <ToolsStack.Screen name="ExchangeRates" component={ExchangeRatesScreen} options={{ title: 'Döviz' }} />
+      <ToolsStack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profilim' }} />
     </ToolsStack.Navigator>
   );
 }

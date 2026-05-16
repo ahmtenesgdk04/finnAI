@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (data: { name: string; email: string; password: string; mode: 'personal' | 'business' }) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (partial: Partial<User>) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -61,7 +62,11 @@ export function useAuthProvider(): AuthContextType {
     setUser(null);
   }, []);
 
-  return { user, isLoading, login, register, logout };
+  const updateUser = useCallback((partial: Partial<User>) => {
+    setUser((prev) => prev ? { ...prev, ...partial } : prev);
+  }, []);
+
+  return { user, isLoading, login, register, logout, updateUser };
 }
 
 export function useAuth(): AuthContextType {

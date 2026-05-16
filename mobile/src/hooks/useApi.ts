@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface ApiState<T> {
   data: T | null;
@@ -26,9 +27,11 @@ export function useApi<T>(apiFn: () => Promise<{ data: T }>, immediate = true) {
     }
   }, [apiFn]);
 
-  useEffect(() => {
-    if (immediate) execute();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      if (immediate) execute();
+    }, [execute, immediate])
+  );
 
   return { ...state, refetch: execute };
 }

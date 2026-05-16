@@ -47,4 +47,30 @@ const getMe = async (userId) => {
   return user;
 };
 
-module.exports = { register, login, getMe };
+const changePassword = async (userId, currentPassword, newPassword) => {
+  const user = await userModel.findByIdRaw(userId);
+  if (!user) {
+    const err = new Error('Kullanıcı bulunamadı');
+    err.status = 404;
+    throw err;
+  }
+  const valid = await bcrypt.compare(currentPassword, user.password);
+  if (!valid) {
+    const err = new Error('Mevcut şifre hatalı');
+    err.status = 401;
+    throw err;
+  }
+  const newHash = await bcrypt.hash(newPassword, 12);
+  await userModel.updatePassword(userId, newHash);
+};
+
+const updateProfile = async (userId, { name }) => {
+  if (!name || !name.trim()) {
+    const err = new Error('Ad boş olamaz');
+    err.status = 400;
+    throw err;
+  }
+  return await userModel.updateName(userId, name.trim());
+};
+
+module.exports = { register, login, getMe, changePassword, updateProfile };

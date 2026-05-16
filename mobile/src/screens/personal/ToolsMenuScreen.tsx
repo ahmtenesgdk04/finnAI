@@ -26,6 +26,12 @@ const SECTIONS = [
       { label: 'Döviz Kurları', icon: 'cash-outline' as const, screen: 'ExchangeRates' as const, desc: 'Güncel döviz ve altın' },
     ],
   },
+  {
+    title: 'Hesap',
+    items: [
+      { label: 'Profilim', icon: 'person-outline' as const, screen: 'Profile' as const, desc: 'Hesap bilgilerin ve ayarlar' },
+    ],
+  },
 ];
 
 export default function ToolsMenuScreen() {

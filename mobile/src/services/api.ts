@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.225.230.206:3000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.134.79.103:3000';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -33,6 +33,10 @@ export const authAPI = {
   register: (data: { name: string; email: string; password: string; mode: string }) =>
     api.post('/api/auth/register', data),
   me: () => api.get('/api/auth/me'),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.patch('/api/auth/password', { currentPassword, newPassword }),
+  updateProfile: (name: string) =>
+    api.patch('/api/auth/profile', { name }),
 };
 
 export const personalAPI = {

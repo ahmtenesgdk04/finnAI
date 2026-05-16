@@ -29,4 +29,21 @@ const updateMode = async (id, mode) => {
   return rows[0];
 };
 
-module.exports = { create, findByEmail, findById, updateMode };
+const findByIdRaw = async (id) => {
+  const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [id]);
+  return rows[0] || null;
+};
+
+const updatePassword = async (id, passwordHash) => {
+  await db.query('UPDATE users SET password = $1 WHERE id = $2', [passwordHash, id]);
+};
+
+const updateName = async (id, name) => {
+  const { rows } = await db.query(
+    'UPDATE users SET name = $1 WHERE id = $2 RETURNING id, name, email, mode, created_at',
+    [name, id]
+  );
+  return rows[0];
+};
+
+module.exports = { create, findByEmail, findById, findByIdRaw, updateMode, updatePassword, updateName };
