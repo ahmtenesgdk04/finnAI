@@ -61,4 +61,13 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getMe, changePassword, updateProfile };
+const deleteAccount = async (req, res, next) => {
+  try {
+    await authService.deleteAccount(req.user.id);
+    res.json({ success: true, message: 'Hesap silindi' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { register, login, getMe, changePassword, updateProfile, deleteAccount };

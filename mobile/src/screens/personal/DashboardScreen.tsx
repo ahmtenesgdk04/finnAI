@@ -15,7 +15,7 @@ import Card from '../../components/common/Card';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 export default function DashboardScreen() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigation = useNavigation<any>();
   const month = formatMonth();
 
@@ -45,9 +45,6 @@ export default function DashboardScreen() {
             <Text style={styles.date}>{formatDate(new Date())}</Text>
           </View>
           <View style={styles.headerRight}>
-            <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
-              <Ionicons name="log-out-outline" size={24} color={colors.text.secondary} />
-            </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('Tools', { screen: 'HealthScore' })}>
               <Ionicons name="heart-circle-outline" size={32} color={colors.personal} />
             </TouchableOpacity>
@@ -148,9 +145,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: theme.spacing.sm,
   },
-  logoutBtn: {
-    padding: 4,
-  },
+
   ratesScroll: { marginHorizontal: -theme.spacing.md, paddingHorizontal: theme.spacing.md },
   rateChip: {
     backgroundColor: colors.card,

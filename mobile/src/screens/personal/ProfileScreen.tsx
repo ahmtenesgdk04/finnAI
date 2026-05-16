@@ -27,6 +27,7 @@ export default function ProfileScreen() {
   const [showNameModal, setShowNameModal] = useState(false);
   const [newName, setNewName] = useState('');
   const [savingName, setSavingName] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem(PHOTO_KEY).then((uri) => {
@@ -146,6 +147,31 @@ export default function ProfileScreen() {
     ]);
   };
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Hesabı Sil',
+      'Bu işlem geri alınamaz. Tüm verileriniz kalıcı olarak silinecek. Devam etmek istiyor musun?',
+      [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: 'Evet, Sil',
+          style: 'destructive',
+          onPress: async () => {
+            setDeletingAccount(true);
+            try {
+              await authAPI.deleteAccount();
+              await AsyncStorage.removeItem(PHOTO_KEY);
+              logout();
+            } catch (err: any) {
+              Alert.alert('Hata', err?.response?.data?.message || 'Hesap silinemedi');
+              setDeletingAccount(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Avatar Kartı */}
@@ -161,12 +187,14 @@ export default function ProfileScreen() {
             </View>
           )}
           <View style={styles.cameraIcon}>
-            <Ionicons name="camera" size={14} color="#fff" />
+            <Ionicons name="camera" size={12} color="#fff" />
           </View>
         </TouchableOpacity>
 
-        <Text style={styles.userName}>{user?.name}</Text>
-        <Text style={styles.userEmail}>{user?.email}</Text>
+        <View style={styles.avatarInfo}>
+          <Text style={styles.userName}>{user?.name}</Text>
+          <Text style={styles.userEmail}>{user?.email}</Text>
+        </View>
         <View style={styles.modeBadge}>
           <Text style={styles.modeText}>
             {user?.mode === 'personal' ? 'Bireysel Mod' : 'İşletme Modu'}
@@ -219,10 +247,20 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* Çıkış */}
+      {/* Çıkış & Hesap Sil */}
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
         <Ionicons name="log-out-outline" size={20} color={colors.danger} />
         <Text style={styles.logoutText}>Oturumu Kapat</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.deleteBtn}
+        onPress={handleDeleteAccount}
+        disabled={deletingAccount}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="trash-outline" size={18} color={colors.text.muted} />
+        <Text style={styles.deleteText}>Hesabı Sil</Text>
       </TouchableOpacity>
 
       {/* İsim Değiştir Modal */}
@@ -299,51 +337,52 @@ const styles = StyleSheet.create({
   avatarCard: {
     backgroundColor: colors.card,
     borderRadius: 16,
-    padding: 24,
+    padding: 16,
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 14,
     ...theme.shadow.card,
   },
-  avatarWrap: { position: 'relative', marginBottom: 4 },
+  avatarWrap: { position: 'relative' },
   avatarImage: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-    borderWidth: 3,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
     borderColor: colors.personal,
   },
   avatarFallback: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: colors.personal,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontSize: 32, fontWeight: '700', color: '#fff' },
+  avatarText: { fontSize: 24, fontWeight: '700', color: '#fff' },
   cameraIcon: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     backgroundColor: colors.personal,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: colors.card,
   },
-  userName: { fontSize: 20, fontWeight: '700', color: colors.text.primary },
-  userEmail: { fontSize: 14, color: colors.text.secondary },
+  avatarInfo: { flex: 1 },
+  userName: { fontSize: 16, fontWeight: '700', color: colors.text.primary },
+  userEmail: { fontSize: 13, color: colors.text.secondary, marginTop: 2 },
   modeBadge: {
     backgroundColor: '#EDE9FE',
     borderRadius: 99,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    marginTop: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
   },
-  modeText: { fontSize: 12, fontWeight: '600', color: colors.personal },
+  modeText: { fontSize: 11, fontWeight: '600', color: colors.personal },
 
   section: { gap: 8 },
   sectionTitle: {
@@ -387,6 +426,14 @@ const styles = StyleSheet.create({
     borderColor: '#FECACA',
   },
   logoutText: { fontSize: 15, fontWeight: '600', color: colors.danger },
+  deleteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    padding: 12,
+  },
+  deleteText: { fontSize: 13, color: colors.text.muted },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: {

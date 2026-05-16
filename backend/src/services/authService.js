@@ -73,4 +73,8 @@ const updateProfile = async (userId, { name }) => {
   return await userModel.updateName(userId, name.trim());
 };
 
-module.exports = { register, login, getMe, changePassword, updateProfile };
+const deleteAccount = async (userId) => {
+  await userModel.deleteById(userId);
+};
+
+module.exports = { register, login, getMe, changePassword, updateProfile, deleteAccount };

@@ -46,4 +46,8 @@ const updateName = async (id, name) => {
   return rows[0];
 };
 
-module.exports = { create, findByEmail, findById, findByIdRaw, updateMode, updatePassword, updateName };
+const deleteById = async (id) => {
+  await db.query('DELETE FROM users WHERE id = $1', [id]);
+};
+
+module.exports = { create, findByEmail, findById, findByIdRaw, updateMode, updatePassword, updateName, deleteById };

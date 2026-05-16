@@ -37,6 +37,8 @@ export const authAPI = {
     api.patch('/api/auth/password', { currentPassword, newPassword }),
   updateProfile: (name: string) =>
     api.patch('/api/auth/profile', { name }),
+  deleteAccount: () =>
+    api.delete('/api/auth/account'),
 };
 
 export const personalAPI = {
