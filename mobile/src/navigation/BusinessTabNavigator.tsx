@@ -12,6 +12,8 @@ import CollectionsScreen from '../screens/business/CollectionsScreen';
 import SupplierCheckScreen from '../screens/business/SupplierCheckScreen';
 import MarketplaceScreen from '../screens/business/MarketplaceScreen';
 import IlanVerScreen from '../screens/business/IlanVerScreen';
+import IlanlarimScreen from '../screens/business/IlanlarimScreen';
+import IlanDetayScreen from '../screens/business/IlanDetayScreen';
 
 const Tab = createBottomTabNavigator();
 const AIStack = createNativeStackNavigator();
@@ -155,17 +157,6 @@ function PazaryeriListesiScreen({ navigation }: { navigation: any }) {
 }
 
 
-function IlanlarimScreen({ navigation }: { navigation: any }) {
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderEmoji}>📋</Text>
-        <Text style={styles.placeholderTitle}>İlanlarım</Text>
-        <Text style={styles.placeholderSub}>İlanlarınız yakında burada görünecek</Text>
-      </View>
-    </SafeAreaView>
-  );
-}
 
 function SiparislerimScreen({ navigation }: { navigation: any }) {
   return (
@@ -186,6 +177,7 @@ function PazaryeriNavigator() {
       <MarketStack.Screen name="PazaryeriListesi" component={PazaryeriListesiScreen} />
       <MarketStack.Screen name="IlanVer" component={IlanVerScreen} />
       <MarketStack.Screen name="Ilanlarim" component={IlanlarimScreen} />
+      <MarketStack.Screen name="IlanDetay" component={IlanDetayScreen} />
       <MarketStack.Screen name="Siparislerim" component={SiparislerimScreen} />
     </MarketStack.Navigator>
   );
