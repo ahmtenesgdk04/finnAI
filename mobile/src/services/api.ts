@@ -92,4 +92,32 @@ export const businessAPI = {
     api.post('/api/supplier/analyze', data),
 };
 
+export const marketplaceAPI = {
+  getAll: (params?: { category?: string; city?: string; search?: string }) =>
+    api.get('/api/marketplace', { params }),
+  getMine: () =>
+    api.get('/api/marketplace/mine'),
+  getById: (id: string) =>
+    api.get(`/api/marketplace/${id}`),
+  create: (data: {
+    title: string;
+    category: string;
+    description?: string;
+    unitPrice: number;
+    currency: string;
+    minOrderQty: number;
+    unit: string;
+    totalStock?: number;
+    deliveryTime?: string;
+    deliveryMethod?: string;
+    paymentTerms?: string;
+    contactPreference: string[];
+    city: string;
+  }) => api.post('/api/marketplace', data),
+  updateStatus: (id: string, status: 'active' | 'passive' | 'sold') =>
+    api.patch(`/api/marketplace/${id}/status`, { status }),
+  remove: (id: string) =>
+    api.delete(`/api/marketplace/${id}`),
+};
+
 export default api;

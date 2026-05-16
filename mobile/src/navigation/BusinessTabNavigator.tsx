@@ -10,9 +10,12 @@ import CashflowScreen from '../screens/business/CashflowScreen';
 import ExpenseAnalysisScreen from '../screens/business/ExpenseAnalysisScreen';
 import CollectionsScreen from '../screens/business/CollectionsScreen';
 import SupplierCheckScreen from '../screens/business/SupplierCheckScreen';
+import MarketplaceScreen from '../screens/business/MarketplaceScreen';
+import IlanVerScreen from '../screens/business/IlanVerScreen';
 
 const Tab = createBottomTabNavigator();
 const AIStack = createNativeStackNavigator();
+const MarketStack = createNativeStackNavigator();
 
 function BusinessDashboard() {
   const { logout, user } = useAuth();
@@ -139,6 +142,55 @@ function AIAraclarNavigator() {
   );
 }
 
+function PazaryeriListesiScreen({ navigation }: { navigation: any }) {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.placeholder}>
+        <Text style={styles.placeholderEmoji}>🏪</Text>
+        <Text style={styles.placeholderTitle}>Pazaryeri</Text>
+        <Text style={styles.placeholderSub}>İlanlar yakında burada görünecek</Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+
+function IlanlarimScreen({ navigation }: { navigation: any }) {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.placeholder}>
+        <Text style={styles.placeholderEmoji}>📋</Text>
+        <Text style={styles.placeholderTitle}>İlanlarım</Text>
+        <Text style={styles.placeholderSub}>İlanlarınız yakında burada görünecek</Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function SiparislerimScreen({ navigation }: { navigation: any }) {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.placeholder}>
+        <Text style={styles.placeholderEmoji}>📦</Text>
+        <Text style={styles.placeholderTitle}>Siparişlerim</Text>
+        <Text style={styles.placeholderSub}>Siparişler yakında burada görünecek</Text>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function PazaryeriNavigator() {
+  return (
+    <MarketStack.Navigator screenOptions={{ headerShown: false }}>
+      <MarketStack.Screen name="PazaryeriMenu" component={MarketplaceScreen} />
+      <MarketStack.Screen name="PazaryeriListesi" component={PazaryeriListesiScreen} />
+      <MarketStack.Screen name="IlanVer" component={IlanVerScreen} />
+      <MarketStack.Screen name="Ilanlarim" component={IlanlarimScreen} />
+      <MarketStack.Screen name="Siparislerim" component={SiparislerimScreen} />
+    </MarketStack.Navigator>
+  );
+}
+
 function IslemlerScreen() { return <PlaceholderScreen title="Gelir & Gider" />; }
 function AyarlarScreen() { return <PlaceholderScreen title="Ayarlar" />; }
 
@@ -161,6 +213,13 @@ export default function BusinessTabNavigator() {
         component={BusinessDashboard}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="Pazaryeri"
+        component={PazaryeriNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
