@@ -20,6 +20,7 @@ app.use('/api/health-score', require('./routes/healthScore'));
 app.use('/api/exchange-rates', require('./routes/exchangeRates'));
 app.use('/api/expenses', require('./routes/expenses'));
 app.use('/api/calendar', require('./routes/calendar'));
+app.use('/api/cashflow', require('./routes/cashflow'));
 
 app.get('/health', (req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV }));
 

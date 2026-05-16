@@ -134,10 +134,47 @@ JSON formatında döndür:
   return JSON.parse(jsonMatch[0]);
 };
 
+const forecastCashflow = async (monthlyHistory) => {
+  const prompt = `Sen FinnAI'ın NakitRadar modülüsün. Bir KOBİ sahibinin geçmiş nakit akışı verisini analiz ederek 30-60-90 günlük tahmin yap.
+
+Aylık geçmiş veri (gelir, gider, net nakit akışı):
+${JSON.stringify(monthlyHistory, null, 2)}
+
+Türkiye'nin ekonomik koşullarını (yüksek enflasyon, kur dalgalanması) göz önünde bulundur.
+
+Şu JSON formatında yanıt ver:
+{
+  "forecast": {
+    "day30": { "expectedIncome": 0, "expectedExpense": 0, "netCashflow": 0, "confidence": 75 },
+    "day60": { "expectedIncome": 0, "expectedExpense": 0, "netCashflow": 0, "confidence": 60 },
+    "day90": { "expectedIncome": 0, "expectedExpense": 0, "netCashflow": 0, "confidence": 45 }
+  },
+  "alerts": [
+    { "type": "warning|danger|info", "message": "Türkçe uyarı mesajı" }
+  ],
+  "insights": ["Türkçe içgörü 1", "Türkçe içgörü 2"],
+  "recommendation": "2-3 cümle Türkçe öneri"
+}
+
+Tüm parasal değerler TL cinsinden olsun. Güven skoru (confidence): 30 gün için daha yüksek, 90 gün için daha düşük olsun.`;
+
+  const msg = await getClient().messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const text = msg.content[0].text;
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('AI yanıtı parse edilemedi');
+  return JSON.parse(jsonMatch[0]);
+};
+
 module.exports = {
   generateLesson,
   analyzeBudget,
   answerFinancialQuestion,
   analyzeShopSecurity,
   generateHealthInsights,
+  forecastCashflow,
 };

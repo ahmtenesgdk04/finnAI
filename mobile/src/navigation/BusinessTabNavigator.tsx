@@ -1,11 +1,15 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
 import { useAuth } from '../hooks/useAuth';
+import CashflowScreen from '../screens/business/CashflowScreen';
 
 const Tab = createBottomTabNavigator();
+const AIStack = createNativeStackNavigator();
 
 function BusinessDashboard() {
   const { logout, user } = useAuth();
@@ -38,12 +42,96 @@ function BusinessDashboard() {
 
 function PlaceholderScreen({ title }: { title: string }) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.placeholderTitle}>{title}</Text>
-      <Text style={styles.placeholderSub}>Yakında gelecek</Text>
-    </View>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.placeholder}>
+        <Text style={styles.placeholderTitle}>{title}</Text>
+        <Text style={styles.placeholderSub}>Yakında gelecek</Text>
+      </View>
+    </SafeAreaView>
   );
 }
+
+function AIMenuScreen({ navigation }: { navigation: any }) {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.aiMenuContent}>
+        <Text style={styles.aiMenuTitle}>AI Modüller</Text>
+        <Text style={styles.aiMenuSub}>Yapay zeka destekli iş araçları</Text>
+
+        <TouchableOpacity
+          style={styles.aiMenuItem}
+          onPress={() => navigation.navigate('NakitRadar')}
+        >
+          <View style={[styles.aiMenuIcon, { backgroundColor: colors.primaryLight }]}>
+            <Ionicons name="radio-outline" size={26} color={colors.business} />
+          </View>
+          <View style={styles.aiMenuText}>
+            <Text style={styles.aiMenuItemTitle}>NakitRadar</Text>
+            <Text style={styles.aiMenuItemSub}>30-60-90 günlük nakit akışı tahmini</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
+        </TouchableOpacity>
+
+        <View style={[styles.aiMenuItem, styles.aiMenuItemDisabled]}>
+          <View style={[styles.aiMenuIcon, { backgroundColor: '#F1F5F9' }]}>
+            <Ionicons name="document-text-outline" size={26} color={colors.text.muted} />
+          </View>
+          <View style={styles.aiMenuText}>
+            <Text style={[styles.aiMenuItemTitle, { color: colors.text.muted }]}>Akıllı Gider Analizi</Text>
+            <Text style={styles.aiMenuItemSub}>Fatura OCR + AI kategorileme</Text>
+          </View>
+          <View style={styles.comingSoon}>
+            <Text style={styles.comingSoonText}>Yakında</Text>
+          </View>
+        </View>
+
+        <View style={[styles.aiMenuItem, styles.aiMenuItemDisabled]}>
+          <View style={[styles.aiMenuIcon, { backgroundColor: '#F1F5F9' }]}>
+            <Ionicons name="people-outline" size={26} color={colors.text.muted} />
+          </View>
+          <View style={styles.aiMenuText}>
+            <Text style={[styles.aiMenuItemTitle, { color: colors.text.muted }]}>TahsilatAI</Text>
+            <Text style={styles.aiMenuItemSub}>Müşteri ödeme skoru + takip</Text>
+          </View>
+          <View style={styles.comingSoon}>
+            <Text style={styles.comingSoonText}>Yakında</Text>
+          </View>
+        </View>
+
+        <View style={[styles.aiMenuItem, styles.aiMenuItemDisabled]}>
+          <View style={[styles.aiMenuIcon, { backgroundColor: '#F1F5F9' }]}>
+            <Ionicons name="shield-checkmark-outline" size={26} color={colors.text.muted} />
+          </View>
+          <View style={styles.aiMenuText}>
+            <Text style={[styles.aiMenuItemTitle, { color: colors.text.muted }]}>GüvenliAlış</Text>
+            <Text style={styles.aiMenuItemSub}>5 katmanlı tedarikçi analizi</Text>
+          </View>
+          <View style={styles.comingSoon}>
+            <Text style={styles.comingSoonText}>Yakında</Text>
+          </View>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function AIAraclarNavigator() {
+  return (
+    <AIStack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.card },
+        headerTitleStyle: { color: colors.text.primary, fontWeight: '600' },
+        headerTintColor: colors.business,
+      }}
+    >
+      <AIStack.Screen name="AIMenu" component={AIMenuScreen} options={{ title: 'AI Araçlar', headerShown: false }} />
+      <AIStack.Screen name="NakitRadar" component={CashflowScreen} options={{ title: 'NakitRadar', headerShown: false }} />
+    </AIStack.Navigator>
+  );
+}
+
+function IslemlerScreen() { return <PlaceholderScreen title="Gelir & Gider" />; }
+function AyarlarScreen() { return <PlaceholderScreen title="Ayarlar" />; }
 
 export default function BusinessTabNavigator() {
   return (
@@ -68,21 +156,21 @@ export default function BusinessTabNavigator() {
       />
       <Tab.Screen
         name="İşlemler"
-        component={() => <PlaceholderScreen title="Gelir & Gider" />}
+        component={IslemlerScreen}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name="swap-horizontal-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
         name="AI Araçlar"
-        component={() => <PlaceholderScreen title="AI Modüller" />}
+        component={AIAraclarNavigator}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name="sparkles-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
         name="Ayarlar"
-        component={() => <PlaceholderScreen title="Ayarlar" />}
+        component={AyarlarScreen}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}
@@ -128,4 +216,33 @@ const styles = StyleSheet.create({
   placeholderEmoji: { fontSize: 56, marginBottom: 16 },
   placeholderTitle: { fontSize: 20, fontWeight: '700', color: colors.text.primary, marginBottom: 8 },
   placeholderSub: { fontSize: 14, color: colors.text.secondary, textAlign: 'center', lineHeight: 22 },
+
+  aiMenuContent: { flex: 1, padding: 24, paddingTop: 32, gap: 16 },
+  aiMenuTitle: { fontSize: 22, fontWeight: '700', color: colors.text.primary },
+  aiMenuSub: { fontSize: 14, color: colors.text.secondary, marginBottom: 8 },
+  aiMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: colors.card,
+    borderRadius: 14,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  aiMenuItemDisabled: { opacity: 0.65 },
+  aiMenuIcon: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  aiMenuText: { flex: 1 },
+  aiMenuItemTitle: { fontSize: 16, fontWeight: '700', color: colors.text.primary },
+  aiMenuItemSub: { fontSize: 12, color: colors.text.secondary, marginTop: 2 },
+  comingSoon: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 8,
+  },
+  comingSoonText: { fontSize: 11, fontWeight: '600', color: colors.text.muted },
 });
