@@ -249,7 +249,7 @@ export default function ProfileScreen() {
 
       {/* Çıkış & Hesap Sil */}
       <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
-        <Ionicons name="log-out-outline" size={20} color={colors.danger} />
+        <Ionicons name="log-out-outline" size={20} color="#B45309" />
         <Text style={styles.logoutText}>Oturumu Kapat</Text>
       </TouchableOpacity>
 
@@ -259,7 +259,7 @@ export default function ProfileScreen() {
         disabled={deletingAccount}
         activeOpacity={0.7}
       >
-        <Ionicons name="trash-outline" size={18} color={colors.text.muted} />
+        <Ionicons name="trash-outline" size={18} color={colors.danger} />
         <Text style={styles.deleteText}>Hesabı Sil</Text>
       </TouchableOpacity>
 
@@ -419,21 +419,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#FEF2F2',
+    backgroundColor: '#FEF9C3',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#FECACA',
+    borderColor: '#FDE047',
   },
-  logoutText: { fontSize: 15, fontWeight: '600', color: colors.danger },
+  logoutText: { fontSize: 15, fontWeight: '600', color: '#B45309' },
   deleteBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    padding: 12,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#FECACA',
   },
-  deleteText: { fontSize: 13, color: colors.text.muted },
+  deleteText: { fontSize: 13, fontWeight: '600', color: colors.danger },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
   sheet: {

@@ -62,4 +62,33 @@ Sadece metin döndür.`;
   return result.response.text().trim();
 };
 
-module.exports = { analyzeBudget, suggestCategory, analyzeExpenses };
+const analyzeShopSecurity = async (url, scrapedData = {}) => {
+  const prompt = `Bir siber güvenlik uzmanısın. Aşağıdaki e-ticaret sitesini güvenlik açısından değerlendir.
+
+URL: ${url}
+${scrapedData.title ? `Site başlığı: ${scrapedData.title}` : ''}
+${scrapedData.hasSSL !== undefined ? `SSL: ${scrapedData.hasSSL ? 'Var' : 'Yok'}` : ''}
+Alan adı: ${scrapedData.domain || ''}
+
+Sadece JSON döndür, başka hiçbir şey yazma:
+{
+  "score": 0-100,
+  "level": "green|yellow|red",
+  "summary": "2-3 cümle Türkçe özet",
+  "layers": [
+    {"name": "SSL Güvenliği", "result": "açıklama", "status": "ok|warning|danger"},
+    {"name": "Domain Güvenilirliği", "result": "açıklama", "status": "ok|warning|danger"},
+    {"name": "İçerik Analizi", "result": "açıklama", "status": "ok|warning|danger"},
+    {"name": "İtibar Kontrolü", "result": "açıklama", "status": "ok|warning|danger"},
+    {"name": "Genel Değerlendirme", "result": "açıklama", "status": "ok|warning|danger"}
+  ]
+}`;
+
+  const result = await getModel().generateContent(prompt);
+  const text = result.response.text().trim();
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('AI yanıtı parse edilemedi');
+  return JSON.parse(jsonMatch[0]);
+};
+
+module.exports = { analyzeBudget, suggestCategory, analyzeExpenses, analyzeShopSecurity };

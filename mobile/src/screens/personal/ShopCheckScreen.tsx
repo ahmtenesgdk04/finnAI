@@ -33,8 +33,9 @@ export default function ShopCheckScreen() {
     try {
       const { data } = await personalAPI.analyzeShop(url.trim());
       setResult(data as AnalysisResult);
-    } catch {
-      Alert.alert('Hata', 'Analiz yapılamadı. Backend bağlantısını kontrol edin.');
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || 'Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.';
+      Alert.alert('Analiz Hatası', msg);
     } finally {
       setLoading(false);
     }

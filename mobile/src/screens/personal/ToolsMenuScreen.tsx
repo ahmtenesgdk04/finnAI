@@ -15,7 +15,6 @@ const SECTIONS = [
       { label: 'Abonelikler', icon: 'card-outline' as const, screen: 'Subscriptions' as const, desc: 'Aylık aboneliklerini takip et' },
       { label: 'Borçlarım', icon: 'trending-down-outline' as const, screen: 'Debt' as const, desc: 'Borç ve alacaklarını yönet' },
       { label: 'Taksitler', icon: 'calendar-outline' as const, screen: 'Installments' as const, desc: 'Taksitli ödemelerin' },
-      { label: 'Notlar', icon: 'document-text-outline' as const, screen: 'Notes' as const, desc: 'Finansal notların' },
     ],
   },
   {

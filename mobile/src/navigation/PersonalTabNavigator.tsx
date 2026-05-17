@@ -13,7 +13,6 @@ import ToolsMenuScreen from '../screens/personal/ToolsMenuScreen';
 import SubscriptionsScreen from '../screens/personal/SubscriptionsScreen';
 import DebtTrackerScreen from '../screens/personal/DebtTrackerScreen';
 import InstallmentsScreen from '../screens/personal/InstallmentsScreen';
-import NotesScreen from '../screens/personal/NotesScreen';
 import ShopCheckScreen from '../screens/personal/ShopCheckScreen';
 import HealthScoreScreen from '../screens/shared/HealthScoreScreen';
 import ExchangeRatesScreen from '../screens/shared/ExchangeRatesScreen';
@@ -32,7 +31,6 @@ export type ToolsStackParamList = {
   Subscriptions: undefined;
   Debt: undefined;
   Installments: undefined;
-  Notes: undefined;
   ShopCheck: undefined;
   HealthScore: undefined;
   ExchangeRates: undefined;
@@ -49,7 +47,6 @@ function ToolsNavigator() {
       <ToolsStack.Screen name="Subscriptions" component={SubscriptionsScreen} options={{ title: 'Abonelikler' }} />
       <ToolsStack.Screen name="Debt" component={DebtTrackerScreen} options={{ title: 'Borçlarım' }} />
       <ToolsStack.Screen name="Installments" component={InstallmentsScreen} options={{ title: 'Taksitler' }} />
-      <ToolsStack.Screen name="Notes" component={NotesScreen} options={{ title: 'Notlar' }} />
       <ToolsStack.Screen name="ShopCheck" component={ShopCheckScreen} options={{ title: 'GüvenliAlış' }} />
       <ToolsStack.Screen name="HealthScore" component={HealthScoreScreen} options={{ title: 'Finansal Sağlık' }} />
       <ToolsStack.Screen name="ExchangeRates" component={ExchangeRatesScreen} options={{ title: 'Döviz' }} />

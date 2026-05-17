@@ -124,7 +124,7 @@ export default function InstallmentsScreen() {
               />
             </View>
             <Text style={styles.cardRemaining}>
-              {item.remainingCount}/{item.totalCount} taksit kaldı
+              {item.totalCount - item.remainingCount} ödendi · {item.remainingCount} kaldı (toplam {item.totalCount})
             </Text>
           </View>
         )}

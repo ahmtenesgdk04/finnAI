@@ -8,7 +8,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '../../constants/colors';
 import { theme } from '../../constants/theme';
-import { formatCurrency, formatShortDate } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/formatters';
+
+const formatRenewalDay = (renewalDate: string): string => {
+  if (!renewalDate) return '-';
+  if (renewalDate.includes('-')) {
+    const day = new Date(renewalDate).getDate();
+    return `Her ay ${day}. günü`;
+  }
+  const day = parseInt(renewalDate, 10);
+  return isNaN(day) ? '-' : `Her ay ${day}. günü`;
+};
 import Button from '../../components/common/Button';
 import EmptyState from '../../components/common/EmptyState';
 
@@ -108,7 +118,7 @@ export default function SubscriptionsScreen() {
             </View>
             <View style={styles.subInfo}>
               <Text style={styles.subName}>{item.name}</Text>
-              <Text style={styles.subRenewal}>Yenileme: {formatShortDate(item.renewalDate)}</Text>
+              <Text style={styles.subRenewal}>Yenileme: {formatRenewalDay(item.renewalDate)}</Text>
               {isUnused(item.lastUsed) && (
                 <Text style={styles.unusedText}>30+ gün kullanılmadı</Text>
               )}
@@ -134,7 +144,7 @@ export default function SubscriptionsScreen() {
             </View>
             <TextInput style={styles.input} placeholder="Abonelik Adı (Netflix, Spotify...)" value={name} onChangeText={setName} />
             <TextInput style={styles.input} placeholder="Aylık Tutar (₺)" keyboardType="numeric" value={amount} onChangeText={setAmount} />
-            <TextInput style={styles.input} placeholder="Yenileme Tarihi (YYYY-AA-GG)" value={renewalDate} onChangeText={setRenewalDate} />
+            <TextInput style={styles.input} placeholder="Yenileme Günü (1-31)" keyboardType="numeric" value={renewalDate} onChangeText={setRenewalDate} />
             <Button title="Kaydet" onPress={handleAdd} />
           </View>
         </View>
