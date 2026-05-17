@@ -52,14 +52,16 @@ export default function DashboardScreen() {
         </View>
 
         {/* Döviz şeridi */}
-        {rates && (
+        {rates && (rates as any).sections && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.ratesScroll}>
-            {Object.entries(rates).map(([key, val]: any) => (
-              <View key={key} style={styles.rateChip}>
-                <Text style={styles.rateKey}>{key}</Text>
-                <Text style={styles.rateVal}>{formatCurrency(val)}</Text>
-              </View>
-            ))}
+            {(rates as any).sections
+              .flatMap((s: any) => s.items)
+              .map((item: any) => (
+                <View key={item.code} style={styles.rateChip}>
+                  <Text style={styles.rateKey}>{item.code}</Text>
+                  <Text style={styles.rateVal}>{formatCurrency(item.value)}</Text>
+                </View>
+              ))}
           </ScrollView>
         )}
 
