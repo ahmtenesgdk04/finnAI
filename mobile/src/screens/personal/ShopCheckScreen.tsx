@@ -73,8 +73,8 @@ export default function ShopCheckScreen() {
 
       {loading && (
         <View style={styles.loadingCard}>
-          <LoadingSpinner text="5 katmanlı analiz çalışıyor..." />
-          {['Alan adı kontrolü', 'SSL sertifikası', 'İtibar analizi', 'İçerik taraması', 'AI değerlendirmesi'].map((step, i) => (
+          <LoadingSpinner text="7 katmanlı analiz çalışıyor..." />
+          {['Alan adı kontrolü', 'SSL sertifikası', 'İçerik taraması', 'Sayfa erişilebilirliği', 'VirusTotal taraması', 'Google güvenlik kontrolü', 'AI değerlendirmesi'].map((step, i) => (
             <View key={i} style={styles.stepRow}>
               <Ionicons name="hourglass-outline" size={16} color={colors.text.muted} />
               <Text style={styles.stepText}>{step}</Text>

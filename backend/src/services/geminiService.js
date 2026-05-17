@@ -79,7 +79,7 @@ Sadece JSON döndür, başka hiçbir şey yazma:
     {"name": "SSL Güvenliği", "result": "açıklama", "status": "ok|warning|danger"},
     {"name": "Domain Güvenilirliği", "result": "açıklama", "status": "ok|warning|danger"},
     {"name": "İçerik Analizi", "result": "açıklama", "status": "ok|warning|danger"},
-    {"name": "İtibar Kontrolü", "result": "açıklama", "status": "ok|warning|danger"},
+    {"name": "Sayfa Erişilebilirliği", "result": "açıklama", "status": "ok|warning|danger"},
     {"name": "Genel Değerlendirme", "result": "açıklama", "status": "ok|warning|danger"}
   ]
 }`;

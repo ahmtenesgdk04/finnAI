@@ -1,6 +1,7 @@
 const safeShopModel = require('../models/safeShopModel');
 const scrapingService = require('./scrapingService');
 const geminiService = require('./geminiService');
+const { checkVirusTotal, checkGoogleSafeBrowsing, buildScanLayers, applyScoreAdjustments } = require('./urlScanService');
 
 const heuristicAnalysis = (url, siteData) => {
   const { hasSSL, isKnownBrand, domain, title } = siteData;
@@ -36,10 +37,12 @@ const heuristicAnalysis = (url, siteData) => {
 
   // Sayfa başlığı
   if (title) {
-    layers.push({ name: 'İtibar Kontrolü', result: `Site başlığı alındı: "${title.substring(0, 60)}".`, status: 'ok' });
+    layers.push({ name: 'Sayfa Erişilebilirliği', result: `Site yanıt verdi, başlık alındı: "${title.substring(0, 60)}".`, status: 'ok' });
+  } else if (isKnownBrand) {
+    layers.push({ name: 'Sayfa Erişilebilirliği', result: 'Site bot engellemesi kullanıyor. Büyük markalarda bu normaldir.', status: 'ok' });
   } else {
     score -= 5;
-    layers.push({ name: 'İtibar Kontrolü', result: 'Sayfa başlığı alınamadı veya site yanıt vermedi.', status: 'warning' });
+    layers.push({ name: 'Sayfa Erişilebilirliği', result: 'Siteye ulaşılamadı veya sayfa başlığı alınamadı.', status: 'warning' });
   }
 
   score = Math.max(0, Math.min(100, score));
@@ -60,7 +63,11 @@ const analyzeUrl = async (userId, url) => {
   const cached = await safeShopModel.findByUrl(url);
   if (cached) return cached.result;
 
-  const siteData = await scrapingService.scrapeBasicInfo(url);
+  const [siteData, vtStats, gsbMatches] = await Promise.all([
+    scrapingService.scrapeBasicInfo(url),
+    checkVirusTotal(url),
+    checkGoogleSafeBrowsing(url),
+  ]);
 
   let result;
   try {
@@ -73,6 +80,17 @@ const analyzeUrl = async (userId, url) => {
     result.score = Math.min(result.score + 15, 95);
     result.level = result.score >= 70 ? 'green' : result.score >= 40 ? 'yellow' : 'red';
   }
+
+  // Dış tarama katmanlarını "Genel Değerlendirme"den önce ekle
+  const scanLayers = buildScanLayers(vtStats, gsbMatches);
+  if (scanLayers.length > 0) {
+    const lastLayer = result.layers.pop();
+    result.layers.push(...scanLayers);
+    result.layers.push(lastLayer);
+  }
+
+  // VT / GSB sonuçlarına göre skoru güncelle
+  result = applyScoreAdjustments(result, vtStats, gsbMatches);
 
   await safeShopModel.saveQuery({
     userId,
