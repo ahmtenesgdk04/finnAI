@@ -96,4 +96,35 @@ const addIncome = async (userId, { amount, source, date, description }) => {
   return rows[0];
 };
 
-module.exports = { getMonthlyHistory, getCurrentMonthTotals, getRecentEntries, addExpense, addIncome };
+const getSummaryByRange = async (userId, startDate, endDate) => {
+  const [expenseResult, incomeResult, entriesResult] = await Promise.all([
+    db.query(
+      `SELECT COALESCE(SUM(amount), 0) AS total FROM business_expenses
+       WHERE user_id = $1 AND date >= $2 AND date <= $3`,
+      [userId, startDate, endDate]
+    ),
+    db.query(
+      `SELECT COALESCE(SUM(amount), 0) AS total FROM business_incomes
+       WHERE user_id = $1 AND date >= $2 AND date <= $3`,
+      [userId, startDate, endDate]
+    ),
+    db.query(
+      `(SELECT 'expense' AS type, id, amount, category AS label, date, description AS note, created_at
+        FROM business_expenses WHERE user_id = $1 AND date >= $2 AND date <= $3)
+       UNION ALL
+       (SELECT 'income' AS type, id, amount, source AS label, date, description AS note, created_at
+        FROM business_incomes WHERE user_id = $1 AND date >= $2 AND date <= $3)
+       ORDER BY date DESC, created_at DESC
+       LIMIT 50`,
+      [userId, startDate, endDate]
+    ),
+  ]);
+
+  return {
+    totalExpense: parseFloat(expenseResult.rows[0].total),
+    totalIncome:  parseFloat(incomeResult.rows[0].total),
+    entries:      entriesResult.rows,
+  };
+};
+
+module.exports = { getMonthlyHistory, getCurrentMonthTotals, getRecentEntries, addExpense, addIncome, getSummaryByRange };

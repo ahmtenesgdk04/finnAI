@@ -1,4 +1,5 @@
 const cashflowService = require('../services/cashflowService');
+const cashflowModel   = require('../models/cashflowModel');
 
 const forecast = async (req, res, next) => {
   try {
@@ -46,4 +47,15 @@ const analyzeExpenses = async (req, res, next) => {
   }
 };
 
-module.exports = { forecast, summary, addExpense, addIncome, analyzeExpenses };
+const summaryByRange = async (req, res, next) => {
+  try {
+    const { start, end } = req.query;
+    if (!start || !end) return res.status(400).json({ error: 'start ve end parametreleri gerekli.' });
+    const result = await cashflowModel.getSummaryByRange(req.user.id, start, end);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { forecast, summary, addExpense, addIncome, analyzeExpenses, summaryByRange };

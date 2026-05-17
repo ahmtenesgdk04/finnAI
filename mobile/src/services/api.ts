@@ -90,6 +90,9 @@ export const businessAPI = {
 
   analyzeSupplier: (data: { supplierName: string; productType?: string; estimatedAmount?: number }) =>
     api.post('/api/supplier/analyze', data),
+
+  getSummaryByRange: (start: string, end: string) =>
+    api.get('/api/cashflow/summary-by-range', { params: { start, end } }),
 };
 
 export const marketplaceAPI = {

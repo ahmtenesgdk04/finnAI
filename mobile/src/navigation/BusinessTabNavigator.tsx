@@ -14,6 +14,7 @@ import MarketplaceScreen from '../screens/business/MarketplaceScreen';
 import IlanVerScreen from '../screens/business/IlanVerScreen';
 import IlanlarimScreen from '../screens/business/IlanlarimScreen';
 import IlanDetayScreen from '../screens/business/IlanDetayScreen';
+import IslemlerScreen from '../screens/business/IslemlerScreen';
 
 const Tab = createBottomTabNavigator();
 const AIStack = createNativeStackNavigator();
@@ -183,7 +184,6 @@ function PazaryeriNavigator() {
   );
 }
 
-function IslemlerScreen() { return <PlaceholderScreen title="Gelir & Gider" />; }
 function AyarlarScreen() { return <PlaceholderScreen title="Ayarlar" />; }
 
 export default function BusinessTabNavigator() {
