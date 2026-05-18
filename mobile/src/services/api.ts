@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.134.79.103:3000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://172.29.35.177:3000';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -39,6 +39,12 @@ export const authAPI = {
     api.patch('/api/auth/profile', { name }),
   deleteAccount: () =>
     api.delete('/api/auth/account'),
+  forgotPassword: (email: string) =>
+    api.post('/api/auth/forgot-password', { email }),
+  verifyOtp: (email: string, otp: string) =>
+    api.post('/api/auth/verify-otp', { email, otp }),
+  resetPassword: (resetToken: string, newPassword: string) =>
+    api.post('/api/auth/reset-password', { resetToken, newPassword }),
 };
 
 export const personalAPI = {
@@ -132,6 +138,21 @@ export const marketplaceAPI = {
     api.patch(`/api/marketplace/${id}/status`, { status }),
   remove: (id: string) =>
     api.delete(`/api/marketplace/${id}`),
+};
+
+export const messagesAPI = {
+  startOrGetConversation: (listingId: string, sellerId: string) =>
+    api.post('/api/messages/conversation', { listingId, sellerId }),
+  getConversations: () =>
+    api.get('/api/messages/conversations'),
+  getMessages: (conversationId: number, after?: number) =>
+    api.get(`/api/messages/${conversationId}`, { params: after ? { after } : undefined }),
+  sendMessage: (conversationId: number, content: string) =>
+    api.post(`/api/messages/${conversationId}`, { content }),
+  markRead: (conversationId: number) =>
+    api.put(`/api/messages/${conversationId}/read`),
+  deleteConversation: (conversationId: number) =>
+    api.delete(`/api/messages/${conversationId}`),
 };
 
 export default api;
