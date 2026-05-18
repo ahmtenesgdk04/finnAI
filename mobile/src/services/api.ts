@@ -6,7 +6,7 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.225.230.206:3000';
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 15000,
+  timeout: 60000,
 });
 
 api.interceptors.request.use(async (config) => {
@@ -78,12 +78,59 @@ export const personalAPI = {
 export const businessAPI = {
   getCashflowSummary: () =>
     api.get('/api/cashflow/summary'),
-  getForecast: () =>
-    api.post('/api/cashflow/forecast'),
+  getForecast: (period: 'short' | 'medium' | 'long' = 'short') =>
+    api.post('/api/cashflow/forecast', { period }),
   addExpense: (data: { amount: number; category: string; date: string; description?: string }) =>
     api.post('/api/cashflow/expense', data),
   addIncome: (data: { amount: number; source: string; date: string; description?: string }) =>
     api.post('/api/cashflow/income', data),
+  analyzeExpenses: () =>
+    api.post('/api/cashflow/analyze-expenses'),
+
+  getCollections: () =>
+    api.get('/api/collection'),
+  addCollection: (data: { customerName: string; amount: number; dueDate: string }) =>
+    api.post('/api/collection', data),
+  markCollectionPaid: (id: string) =>
+    api.patch(`/api/collection/${id}/paid`),
+  deleteCollection: (id: string) =>
+    api.delete(`/api/collection/${id}`),
+  analyzeCollections: () =>
+    api.post('/api/collection/analyze'),
+
+  analyzeSupplier: (data: { supplierName: string; productType?: string; estimatedAmount?: number }) =>
+    api.post('/api/supplier/analyze', data),
+
+  getSummaryByRange: (start: string, end: string) =>
+    api.get('/api/cashflow/summary-by-range', { params: { start, end } }),
+};
+
+export const marketplaceAPI = {
+  getAll: (params?: { category?: string; city?: string; search?: string }) =>
+    api.get('/api/marketplace', { params }),
+  getMine: () =>
+    api.get('/api/marketplace/mine'),
+  getById: (id: string) =>
+    api.get(`/api/marketplace/${id}`),
+  create: (data: {
+    title: string;
+    category: string;
+    description?: string;
+    unitPrice: number;
+    currency: string;
+    minOrderQty: number;
+    unit: string;
+    totalStock?: number;
+    deliveryTime?: string;
+    deliveryMethod?: string;
+    paymentTerms?: string;
+    contactPreference: string[];
+    city: string;
+  }) => api.post('/api/marketplace', data),
+  updateStatus: (id: string, status: 'active' | 'passive' | 'sold') =>
+    api.patch(`/api/marketplace/${id}/status`, { status }),
+  remove: (id: string) =>
+    api.delete(`/api/marketplace/${id}`),
 };
 
 export default api;

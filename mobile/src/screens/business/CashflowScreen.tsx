@@ -12,6 +12,8 @@ import { businessAPI } from '../../services/api';
 import { useApi } from '../../hooks/useApi';
 
 type AlertType = 'warning' | 'danger' | 'info';
+type VadeTipi = 'short' | 'medium' | 'long';
+type PeriodKey = 'day30' | 'day60' | 'day90' | 'month6' | 'month9' | 'month12' | 'year1' | 'year2' | 'year3';
 
 interface ForecastPeriod {
   expectedIncome: number;
@@ -21,11 +23,17 @@ interface ForecastPeriod {
 }
 
 interface ForecastResult {
-  forecast: { day30: ForecastPeriod; day60: ForecastPeriod; day90: ForecastPeriod };
+  forecast: Partial<Record<PeriodKey, ForecastPeriod>>;
   alerts: { type: AlertType; message: string }[];
   insights: string[];
   recommendation: string;
 }
+
+const VADE_CONFIG: Record<VadeTipi, { label: string; sublabel: string; keys: PeriodKey[]; keyLabels: Partial<Record<PeriodKey, string>> }> = {
+  short:  { label: 'Kısa Vade', sublabel: '30-60-90 Gün', keys: ['day30', 'day60', 'day90'],     keyLabels: { day30: '30 Gün', day60: '60 Gün', day90: '90 Gün' } },
+  medium: { label: 'Orta Vade', sublabel: '6-9-12 Ay',    keys: ['month6', 'month9', 'month12'], keyLabels: { month6: '6 Ay', month9: '9 Ay', month12: '12 Ay' } },
+  long:   { label: 'Uzun Vade', sublabel: '1-2-3 Yıl',    keys: ['year1', 'year2', 'year3'],     keyLabels: { year1: '1. Yıl', year2: '2. Yıl', year3: '3. Yıl' } },
+};
 
 interface Summary {
   currentMonth: { totalIncome: number; totalExpense: number };
@@ -34,7 +42,8 @@ interface Summary {
 
 const EXPENSE_CATEGORIES = ['Kira', 'Hammadde', 'Lojistik', 'Personel', 'Vergi', 'Enerji', 'Pazarlama', 'Diğer'];
 
-export default function CashflowScreen() {
+export default function CashflowScreen({ navigation }: { navigation: any }) {
+  const [selectedPeriod, setSelectedPeriod] = useState<VadeTipi>('short');
   const [forecast, setForecast] = useState<ForecastResult | null>(null);
   const [forecasting, setForecasting] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -54,7 +63,7 @@ export default function CashflowScreen() {
   const handleForecast = async () => {
     setForecasting(true);
     try {
-      const { data } = await businessAPI.getForecast();
+      const { data } = await businessAPI.getForecast(selectedPeriod);
       setForecast(data);
     } catch {
       Alert.alert('Hata', 'Tahmin alınırken bir sorun oluştu.');
@@ -114,7 +123,10 @@ export default function CashflowScreen() {
       >
         {/* Başlık */}
         <View style={styles.header}>
-          <View>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={26} color={colors.text.primary} />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
             <Text style={styles.title}>NakitRadar</Text>
             <Text style={styles.subtitle}>30-60-90 günlük nakit akışı tahmini</Text>
           </View>
@@ -163,6 +175,24 @@ export default function CashflowScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Vade Seçici */}
+        <View style={styles.periodSelector}>
+          {(Object.keys(VADE_CONFIG) as VadeTipi[]).map((p) => (
+            <TouchableOpacity
+              key={p}
+              style={[styles.periodBtn, selectedPeriod === p && styles.periodBtnActive]}
+              onPress={() => { setSelectedPeriod(p); setForecast(null); }}
+            >
+              <Text style={[styles.periodBtnText, selectedPeriod === p && styles.periodBtnTextActive]}>
+                {VADE_CONFIG[p].label}
+              </Text>
+              <Text style={[styles.periodBtnSub, selectedPeriod === p && styles.periodBtnSubActive]}>
+                {VADE_CONFIG[p].sublabel}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         {/* AI Tahmin Butonu */}
         <TouchableOpacity
           style={[styles.forecastBtn, forecasting && styles.forecastBtnDisabled]}
@@ -183,9 +213,10 @@ export default function CashflowScreen() {
         {forecast && (
           <>
             <Text style={styles.sectionTitle}>Nakit Akışı Tahmini</Text>
-            {(['day30', 'day60', 'day90'] as const).map((key) => {
+            {VADE_CONFIG[selectedPeriod].keys.map((key) => {
               const period = forecast.forecast[key];
-              const label = key === 'day30' ? '30 Gün' : key === 'day60' ? '60 Gün' : '90 Gün';
+              if (!period) return null;
+              const label = VADE_CONFIG[selectedPeriod].keyLabels[key]!;
               const isPositive = period.netCashflow >= 0;
               return (
                 <View key={key} style={styles.forecastCard}>
@@ -345,7 +376,8 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   content: { padding: theme.spacing.md, gap: theme.spacing.md, paddingBottom: 40 },
 
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  backBtn: { padding: 4 },
   title: { ...theme.typography.h2, color: colors.text.primary },
   subtitle: { ...theme.typography.caption, color: colors.text.secondary, marginTop: 2 },
   radarIcon: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
@@ -364,6 +396,18 @@ const styles = StyleSheet.create({
     gap: 6, paddingVertical: 12, borderRadius: theme.borderRadius.md,
   },
   addBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+
+  periodSelector: { flexDirection: 'row', gap: theme.spacing.sm },
+  periodBtn: {
+    flex: 1, alignItems: 'center', paddingVertical: 10, paddingHorizontal: 4,
+    backgroundColor: colors.card, borderRadius: theme.borderRadius.md,
+    borderWidth: 1.5, borderColor: colors.border, ...theme.shadow.card,
+  },
+  periodBtnActive: { borderColor: colors.business, backgroundColor: colors.businessLight },
+  periodBtnText: { fontSize: 12, fontWeight: '700', color: colors.text.secondary },
+  periodBtnTextActive: { color: colors.business },
+  periodBtnSub: { fontSize: 10, color: colors.text.muted, marginTop: 2 },
+  periodBtnSubActive: { color: colors.business },
 
   forecastBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
