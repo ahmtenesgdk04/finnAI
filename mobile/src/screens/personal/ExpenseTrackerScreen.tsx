@@ -40,6 +40,10 @@ export default function ExpenseTrackerScreen() {
       Alert.alert('Uyarı', 'Tutar ve kategori zorunludur');
       return;
     }
+    if (parseFloat(amount) <= 0) {
+      Alert.alert('Uyarı', 'Tutar 0 veya negatif olamaz');
+      return;
+    }
     try {
       await addEntry({
         amount: parseFloat(amount),

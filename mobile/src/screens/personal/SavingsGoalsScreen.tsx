@@ -45,6 +45,10 @@ export default function SavingsGoalsScreen() {
       Alert.alert('Uyarı', 'Tüm alanları doldurun');
       return;
     }
+    if (parseFloat(targetAmount) <= 0) {
+      Alert.alert('Uyarı', 'Hedef tutar 0 veya negatif olamaz');
+      return;
+    }
     try {
       await createGoal({ name, targetAmount: parseFloat(targetAmount), targetDate, currentAmount: 0 });
       setName(''); setTargetAmount(''); setTargetDate('');
@@ -57,10 +61,29 @@ export default function SavingsGoalsScreen() {
 
   const handleContrib = async () => {
     if (!showContrib || !contribution) return;
+    const amount = parseFloat(contribution);
+    if (amount <= 0) {
+      Alert.alert('Uyarı', 'Katkı tutarı 0 veya negatif olamaz');
+      return;
+    }
     try {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const res = await personalAPI.getSummary(currentMonth);
+      const summary = (res as any).data;
+      const remaining = (summary.budget || 1000000) - (summary.total || 0);
+      if (amount > remaining) {
+        Alert.alert('Yetersiz Bütçe', `Bu ay kalan bütçeniz ${remaining.toFixed(2)} ₺. Katkı eklenemedi.`);
+        return;
+      }
       await updateGoal({
         id: showContrib.id,
-        data: { currentAmount: showContrib.currentAmount + parseFloat(contribution) },
+        data: { currentAmount: showContrib.currentAmount + amount },
+      });
+      await personalAPI.addEntry({
+        amount,
+        category: 'Birikim',
+        date: new Date().toISOString().split('T')[0],
+        note: showContrib.name,
       });
       setContribution('');
       setShowContrib(null);

@@ -9,28 +9,18 @@ const setLimit = async (userId, category, monthlyLimit) => {
 };
 
 const analyzeBudget = async (userId) => {
-  const months = [];
-  for (let i = 2; i >= 0; i--) {
-    const d = new Date();
-    d.setMonth(d.getMonth() - i);
-    months.push(formatMonth(d));
-  }
-
-  const monthlyData = [];
-  for (const month of months) {
-    const { start, end } = monthRange(month);
-    const entries = await expenseModel.findByUserAndMonth(userId, start, end);
-    const categoryTotals = {};
-    for (const e of entries) {
-      categoryTotals[e.category] = (categoryTotals[e.category] || 0) + parseFloat(e.amount);
-    }
-    monthlyData.push({ month, categories: categoryTotals });
-  }
-
   const currentMonth = formatMonth();
+  const { start, end } = monthRange(currentMonth);
+  const entries = await expenseModel.findByUserAndMonth(userId, start, end);
+  const categoryTotals = {};
+  for (const e of entries) {
+    categoryTotals[e.category] = (categoryTotals[e.category] || 0) + parseFloat(e.amount);
+  }
+  const monthlyData = [{ month: currentMonth, categories: categoryTotals }];
+
   const inflationData = inflationService.getMonthlyInflation(currentMonth);
-  const insight = await geminiService.analyzeBudget(monthlyData, inflationData);
-  return { insight, months: monthlyData };
+  const analysis = await geminiService.analyzeBudget(monthlyData, inflationData);
+  return { ...analysis, months: monthlyData };
 };
 
 const createGoal = async (userId, goalData) => budgetModel.createGoal({ userId, ...goalData });

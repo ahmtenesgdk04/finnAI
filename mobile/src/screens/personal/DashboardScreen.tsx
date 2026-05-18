@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, FlatList, StyleSheet, RefreshControl,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -94,7 +94,7 @@ export default function DashboardScreen() {
         <View style={styles.actions}>
           {[
             { icon: 'add-circle-outline', label: '+ Harcama', screen: 'Budget' },
-            { icon: 'flag-outline', label: '+ Hedef', screen: 'Goals' },
+            { icon: 'flag-outline', label: '+ Birikim', screen: 'Goals' },
             { icon: 'school-outline', label: "Koç'a Sor", screen: 'Coach' },
           ].map((a) => (
             <TouchableOpacity
@@ -121,7 +121,9 @@ export default function DashboardScreen() {
                 <Text style={styles.entryCategory}>{entry.category}</Text>
                 <Text style={styles.entryNote}>{entry.note || entry.date}</Text>
               </View>
-              <Text style={styles.entryAmount}>-{formatCurrency(entry.amount)}</Text>
+              <Text style={[styles.entryAmount, entry.amount < 0 && { color: colors.secondary }]}>
+                {entry.amount < 0 ? `+${formatCurrency(-entry.amount)}` : `-${formatCurrency(entry.amount)}`}
+              </Text>
             </View>
           ))
         )}

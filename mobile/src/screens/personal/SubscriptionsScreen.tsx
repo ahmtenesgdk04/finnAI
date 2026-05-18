@@ -9,6 +9,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '../../constants/colors';
 import { theme } from '../../constants/theme';
 import { formatCurrency } from '../../utils/formatters';
+import { personalAPI } from '../../services/api';
 
 const formatRenewalDay = (renewalDate: string): string => {
   if (!renewalDate) return '-';
@@ -28,7 +29,15 @@ interface Subscription {
   amount: number;
   renewalDate: string;
   lastUsed?: string;
+  lastBilled?: string; // 'YYYY-MM' formatı
 }
+
+const getRenewalDay = (renewalDate: string): number => {
+  if (!renewalDate) return 0;
+  if (renewalDate.includes('-')) return new Date(renewalDate).getDate();
+  const d = parseInt(renewalDate, 10);
+  return isNaN(d) ? 0 : d;
+};
 
 const STORAGE_KEY = 'subscriptions';
 
@@ -41,8 +50,70 @@ export default function SubscriptionsScreen() {
 
   useFocusEffect(
     React.useCallback(() => {
-      AsyncStorage.getItem(STORAGE_KEY).then((val) => {
-        if (val) setSubs(JSON.parse(val));
+      AsyncStorage.getItem(STORAGE_KEY).then(async (val) => {
+        if (!val) return;
+        const loaded: Subscription[] = JSON.parse(val);
+
+        const today = new Date();
+        const todayDay = today.getDate();
+        const currentMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+        const todayStr = today.toISOString().split('T')[0];
+
+        let remainingBudget = Infinity;
+        try {
+          const res = await personalAPI.getSummary(currentMonth);
+          const summary = (res as any).data;
+          remainingBudget = (summary.budget || 1000000) - (summary.total || 0);
+        } catch {}
+
+        const billedNames: string[] = [];
+        const skippedNames: string[] = [];
+        const updated: Subscription[] = [];
+
+        for (const sub of loaded) {
+          const renewalDay = getRenewalDay(sub.renewalDate);
+          if (renewalDay > 0 && todayDay >= renewalDay && sub.lastBilled !== currentMonth) {
+            if (sub.amount > remainingBudget) {
+              skippedNames.push(sub.name);
+              updated.push(sub);
+              continue;
+            }
+            try {
+              await personalAPI.addEntry({
+                amount: sub.amount,
+                category: 'Abonelik',
+                date: todayStr,
+                note: sub.name,
+              });
+              remainingBudget -= sub.amount;
+              billedNames.push(sub.name);
+              updated.push({ ...sub, lastBilled: currentMonth });
+            } catch {
+              updated.push(sub);
+            }
+          } else {
+            updated.push(sub);
+          }
+        }
+
+        if (billedNames.length > 0 || skippedNames.length > 0) {
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+          setSubs(updated);
+          if (billedNames.length > 0) {
+            Alert.alert(
+              'Abonelik Harcaması Eklendi',
+              `${billedNames.join(', ')} bu aya ait harcama olarak bütçene eklendi.`
+            );
+          }
+          if (skippedNames.length > 0) {
+            Alert.alert(
+              'Yetersiz Bütçe',
+              `${skippedNames.join(', ')} için bütçeniz yeterli olmadığından ödeme yapılamadı.`
+            );
+          }
+        } else {
+          setSubs(loaded);
+        }
       });
     }, [])
   );
@@ -55,6 +126,10 @@ export default function SubscriptionsScreen() {
   const handleAdd = async () => {
     if (!name || !amount || !renewalDate) {
       Alert.alert('Uyarı', 'Tüm alanları doldurun');
+      return;
+    }
+    if (parseFloat(amount) <= 0) {
+      Alert.alert('Uyarı', 'Tutar 0 veya negatif olamaz');
       return;
     }
     const newSub: Subscription = {
