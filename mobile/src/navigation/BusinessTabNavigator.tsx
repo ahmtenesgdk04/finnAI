@@ -24,11 +24,14 @@ import IncomesExpensesScreen from '../screens/business/IncomesExpensesScreen';
 import CalculatorScreen from '../screens/business/CalculatorScreen';
 import HealthScoreScreen from '../screens/shared/HealthScoreScreen';
 import ExchangeRatesScreen from '../screens/shared/ExchangeRatesScreen';
+import ConversationsScreen from '../screens/messages/ConversationsScreen';
+import ChatScreen from '../screens/messages/ChatScreen';
 
 const Tab = createBottomTabNavigator();
 const AIStack = createNativeStackNavigator();
 const MarketStack = createNativeStackNavigator();
 const AyarlarStack = createNativeStackNavigator();
+const MessagesStack = createNativeStackNavigator();
 
 
 function PlaceholderScreen({ title }: { title: string }) {
@@ -154,6 +157,15 @@ function PazaryeriNavigator() {
   );
 }
 
+function MessagesNavigator() {
+  return (
+    <MessagesStack.Navigator screenOptions={{ headerShown: false }}>
+      <MessagesStack.Screen name="Conversations" component={ConversationsScreen} />
+      <MessagesStack.Screen name="Chat" component={ChatScreen} />
+    </MessagesStack.Navigator>
+  );
+}
+
 function AyarlarNavigator() {
   return (
     <AyarlarStack.Navigator screenOptions={{ headerShown: false }}>
@@ -195,6 +207,13 @@ export default function BusinessTabNavigator() {
         component={PazaryeriNavigator}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name="storefront-outline" size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="Mesajlar"
+        component={MessagesNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen

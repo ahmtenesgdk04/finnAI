@@ -139,4 +139,19 @@ export const marketplaceAPI = {
     api.delete(`/api/marketplace/${id}`),
 };
 
+export const messagesAPI = {
+  startOrGetConversation: (listingId: string, sellerId: string) =>
+    api.post('/api/messages/conversation', { listingId, sellerId }),
+  getConversations: () =>
+    api.get('/api/messages/conversations'),
+  getMessages: (conversationId: number, after?: number) =>
+    api.get(`/api/messages/${conversationId}`, { params: after ? { after } : undefined }),
+  sendMessage: (conversationId: number, content: string) =>
+    api.post(`/api/messages/${conversationId}`, { content }),
+  markRead: (conversationId: number) =>
+    api.put(`/api/messages/${conversationId}/read`),
+  deleteConversation: (conversationId: number) =>
+    api.delete(`/api/messages/${conversationId}`),
+};
+
 export default api;
