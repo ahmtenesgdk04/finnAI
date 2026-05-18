@@ -29,9 +29,9 @@ const getSummary = async (userId, monthStr) => {
   return {
     month: monthStr,
     total,
-    budget: limits.reduce((s, l) => s + parseFloat(l.monthly_limit), 0) || 10000,
+    budget: limits.reduce((s, l) => s + parseFloat(l.monthly_limit), 0) || 1000000,
     categories,
-    entries: entries.slice(0, 20),
+    entries,
   };
 };
 

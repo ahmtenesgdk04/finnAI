@@ -120,16 +120,29 @@ const buildScanLayers = (vtStats, gsbMatches) => {
 const applyScoreAdjustments = (result, vtStats, gsbMatches) => {
   let { score } = result;
 
+  // Google Safe Browsing: aktif tehdit tespiti → skoru 20'nin altına indir (her zaman kırmızı)
   if (gsbMatches && gsbMatches.length > 0) {
-    score = Math.max(0, score - 35);
+    score = Math.min(score, 20);
   }
 
   if (vtStats) {
     const { malicious = 0, suspicious = 0 } = vtStats;
-    if (malicious >= 5) score = Math.max(0, score - 30);
-    else if (malicious >= 1) score = Math.max(0, score - 15);
-    else if (suspicious >= 3) score = Math.max(0, score - 10);
-    else if (malicious === 0 && suspicious === 0) score = Math.min(100, score + 10);
+    if (malicious >= 5) {
+      // Çok sayıda motor tehlikeli işaretledi → skoru 15'e indir
+      score = Math.min(score, 15);
+    } else if (malicious >= 1) {
+      // En az bir motor tehlikeli işaretledi → -40 puan (güçlü ceza)
+      score = Math.max(0, score - 40);
+    } else if (suspicious >= 3) {
+      // Birden fazla şüpheli işaret → -25 puan
+      score = Math.max(0, score - 25);
+    } else if (suspicious >= 1) {
+      // Hafif şüphe → -12 puan
+      score = Math.max(0, score - 12);
+    } else if (malicious === 0 && suspicious === 0) {
+      // Temiz çıktı → +15 puan bonus
+      score = Math.min(100, score + 15);
+    }
   }
 
   const level = score >= 70 ? 'green' : score >= 40 ? 'yellow' : 'red';

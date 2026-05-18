@@ -51,20 +51,25 @@ Yaniti JSON formatinda ver:
 };
 
 const analyzeBudget = async (monthlyData, inflationData) => {
-  const prompt = `Bir finansal analist olarak kullanicinin harcama verisini analiz et.
+  const prompt = `Bir finansal analist olarak kullanicinin bu aylik harcama verisini analiz et.
 
-Harcama verisi (son 3 ay):
+Harcama verisi (bu ay):
 ${JSON.stringify(monthlyData, null, 2)}
 
 Enflasyon verisi:
 ${JSON.stringify(inflationData, null, 2)}
 
-Turkce, kisa ve pratik bir analiz yaz (2-3 cumle). Reel tasarruf/kayip vurgula.
-Ornek format: "Market harcamaniz %12 artti, gida enflasyonu %15 oldugundan reel olarak tasarruf etmisiniz."
-Sadece analiz metnini dondur, JSON degil.`;
+Asagidaki JSON formatinda yanit ver, baska hicbir sey yazma:
+{
+  "alerts": [{"type": "danger|warning|info", "message": "uyari metni"}],
+  "insights": ["icgoru 1", "icgoru 2"],
+  "recommendation": "tek somut oneri"
+}
+
+Kurallar: alerts limit asimi/dikkat durumlari (1-3), insights harcama dagilimi ve enflasyon gercegi (2-4), recommendation en faydali tek oneri. Turkce yaz.`;
 
   const text = await generateText(prompt, 2048);
-  return text.trim();
+  return parseJSON(text);
 };
 
 const answerFinancialQuestion = async (question, userContext = {}) => {
