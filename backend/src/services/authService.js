@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const db = require('../config/database');
 const userModel = require('../models/userModel');
+const emailService = require('./emailService');
 
 const register = async ({ name, email, password, mode }) => {
   const existing = await userModel.findByEmail(email);
@@ -77,4 +80,83 @@ const deleteAccount = async (userId) => {
   await userModel.deleteById(userId);
 };
 
-module.exports = { register, login, getMe, changePassword, updateProfile, deleteAccount };
+const forgotPassword = async (email) => {
+  const user = await userModel.findByEmail(email);
+  // Always return silently to prevent email enumeration
+  if (!user) return;
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  await db.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [user.id]);
+  await db.query(
+    'INSERT INTO password_reset_tokens (user_id, otp_hash, expires_at) VALUES ($1, $2, $3)',
+    [user.id, otpHash, expiresAt]
+  );
+
+  await emailService.sendOtp(email, otp);
+};
+
+const verifyOtp = async (email, otp) => {
+  const user = await userModel.findByEmail(email);
+  if (!user) {
+    const err = new Error('Kod hatalı veya süresi dolmuş');
+    err.status = 400;
+    throw err;
+  }
+
+  const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
+  const { rows } = await db.query(
+    'SELECT * FROM password_reset_tokens WHERE user_id = $1 AND otp_hash = $2 AND expires_at > NOW()',
+    [user.id, otpHash]
+  );
+
+  if (!rows[0]) {
+    const err = new Error('Kod hatalı veya süresi dolmuş');
+    err.status = 400;
+    throw err;
+  }
+
+  // One-time use: delete token immediately after verification
+  await db.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [user.id]);
+
+  // Short-lived reset token (15 min), purpose field prevents misuse
+  const resetToken = jwt.sign(
+    { id: user.id, purpose: 'password_reset' },
+    process.env.JWT_SECRET,
+    { expiresIn: '15m' }
+  );
+  return { resetToken };
+};
+
+const resetPassword = async (resetToken, newPassword) => {
+  let payload;
+  try {
+    payload = jwt.verify(resetToken, process.env.JWT_SECRET);
+  } catch {
+    const err = new Error('Geçersiz veya süresi dolmuş oturum. Lütfen tekrar deneyin.');
+    err.status = 400;
+    throw err;
+  }
+
+  if (payload.purpose !== 'password_reset') {
+    const err = new Error('Geçersiz token');
+    err.status = 400;
+    throw err;
+  }
+
+  if (!newPassword || newPassword.length < 6) {
+    const err = new Error('Şifre en az 6 karakter olmalıdır');
+    err.status = 400;
+    throw err;
+  }
+
+  const newHash = await bcrypt.hash(newPassword, 12);
+  await userModel.updatePassword(payload.id, newHash);
+};
+
+module.exports = {
+  register, login, getMe, changePassword, updateProfile, deleteAccount,
+  forgotPassword, verifyOtp, resetPassword,
+};

@@ -30,9 +30,31 @@ app.get('/health', (req, res) => res.json({ status: 'ok', env: process.env.NODE_
 app.use(notFound);
 app.use(errorHandler);
 
+const seedBusiness = require('./scripts/seedBusiness');
+const db = require('./config/database');
+
+const initDB = async () => {
+  await db.query(`
+    DROP TABLE IF EXISTS password_reset_tokens;
+    CREATE TABLE password_reset_tokens (
+      id SERIAL PRIMARY KEY,
+      user_id UUID NOT NULL,
+      otp_hash VARCHAR(64) NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+};
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`FinnAI backend çalışıyor: http://localhost:${PORT}`);
+  try {
+    await initDB();
+    await seedBusiness();
+  } catch (e) {
+    console.error('[init] Hata:', e.message);
+  }
 });
 
 module.exports = app;

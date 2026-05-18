@@ -63,6 +63,7 @@ export default function IlanDetayScreen({ route, navigation }: { route: any; nav
   const [listing, setListing] = useState<Listing>(route.params.listing);
   const [statusLoading, setStatusLoading] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const isOwner = route.params.isOwner !== false;
 
   const s = STATUS_INFO[listing.status];
   const dateStr = new Date(listing.created_at).toLocaleDateString('tr-TR', {
@@ -169,7 +170,7 @@ export default function IlanDetayScreen({ route, navigation }: { route: any; nav
         )}
 
         {/* Aksiyonlar */}
-        <View style={styles.actions}>
+        {isOwner && <View style={styles.actions}>
           <TouchableOpacity
             style={styles.statusBtn}
             onPress={() => setMenuVisible(true)}
@@ -189,7 +190,7 @@ export default function IlanDetayScreen({ route, navigation }: { route: any; nav
             <Ionicons name="trash-outline" size={18} color={colors.danger} />
             <Text style={styles.deleteBtnText}>İlanı Sil</Text>
           </TouchableOpacity>
-        </View>
+        </View>}
       </ScrollView>
 
       {/* Durum Seçim Modal */}

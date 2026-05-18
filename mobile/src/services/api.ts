@@ -39,6 +39,12 @@ export const authAPI = {
     api.patch('/api/auth/profile', { name }),
   deleteAccount: () =>
     api.delete('/api/auth/account'),
+  forgotPassword: (email: string) =>
+    api.post('/api/auth/forgot-password', { email }),
+  verifyOtp: (email: string, otp: string) =>
+    api.post('/api/auth/verify-otp', { email, otp }),
+  resetPassword: (resetToken: string, newPassword: string) =>
+    api.post('/api/auth/reset-password', { resetToken, newPassword }),
 };
 
 export const personalAPI = {
