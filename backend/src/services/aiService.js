@@ -1,10 +1,12 @@
-const Anthropic = require('@anthropic-ai/sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-let client;
+let genAI;
 const getClient = () => {
-  if (!client) client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  return client;
+  if (!genAI) genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  return genAI;
 };
+
+const getModel = () => getClient().getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
 
 const generateLesson = async (topic, userLevel, userData = {}) => {
   const levelMap = { 1: 'başlangıç', 2: 'orta', 3: 'ileri', 4: 'uzman' };
@@ -25,13 +27,8 @@ Yanıtı JSON formatında ver:
   "xp": 50
 }`;
 
-  const msg = await getClient().messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const text = msg.content[0].text;
+  const result = await getModel().generateContent(prompt);
+  const text = result.response.text().trim();
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('AI yanıtı parse edilemedi');
   return JSON.parse(jsonMatch[0]);
@@ -50,12 +47,8 @@ Türkçe, kısa ve pratik bir analiz yaz (2-3 cümle). Reel tasarruf/kayıp vurg
 Örnek format: "Market harcamanız %12 arttı, gıda enflasyonu %15 olduğundan reel olarak tasarruf etmişsiniz."
 Sadece analiz metnini döndür, JSON değil.`;
 
-  const msg = await getClient().messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 512,
-    messages: [{ role: 'user', content: prompt }],
-  });
-  return msg.content[0].text.trim();
+  const result = await getModel().generateContent(prompt);
+  return result.response.text().trim();
 };
 
 const answerFinancialQuestion = async (question, userContext = {}) => {
@@ -66,12 +59,8 @@ Soru: ${question}
 
 Türkçe, pratik ve anlaşılır bir cevap ver (max 3 paragraf). Türkiye koşullarını göz önünde bulundur.`;
 
-  const msg = await getClient().messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 768,
-    messages: [{ role: 'user', content: prompt }],
-  });
-  return msg.content[0].text.trim();
+  const result = await getModel().generateContent(prompt);
+  return result.response.text().trim();
 };
 
 const analyzeShopSecurity = async (url, scrapedData = {}) => {
@@ -91,18 +80,13 @@ JSON formatında döndür:
     {"name": "SSL Güvenliği", "result": "açıklama", "status": "ok|warning|danger"},
     {"name": "Domain Güvenilirliği", "result": "açıklama", "status": "ok|warning|danger"},
     {"name": "İçerik Analizi", "result": "açıklama", "status": "ok|warning|danger"},
-    {"name": "İtibar Kontrolü", "result": "açıklama", "status": "ok|warning|danger"},
+    {"name": "Sayfa Erişilebilirliği", "result": "açıklama", "status": "ok|warning|danger"},
     {"name": "Genel Değerlendirme", "result": "açıklama", "status": "ok|warning|danger"}
   ]
 }`;
 
-  const msg = await getClient().messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const text = msg.content[0].text;
+  const result = await getModel().generateContent(prompt);
+  const text = result.response.text().trim();
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('AI yanıtı parse edilemedi');
   return JSON.parse(jsonMatch[0]);
@@ -122,13 +106,8 @@ JSON formatında döndür:
   "warnings": ["uyarı1"]
 }`;
 
-  const msg = await getClient().messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 512,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const text = msg.content[0].text;
+  const result = await getModel().generateContent(prompt);
+  const text = result.response.text().trim();
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) return { insights: [], warnings: [] };
   return JSON.parse(jsonMatch[0]);
@@ -158,13 +137,8 @@ Türkiye'nin ekonomik koşullarını (yüksek enflasyon, kur dalgalanması) göz
 
 Tüm parasal değerler TL cinsinden olsun. Güven skoru (confidence): 30 gün için daha yüksek, 90 gün için daha düşük olsun.`;
 
-  const msg = await getClient().messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1024,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const text = msg.content[0].text;
+  const result = await getModel().generateContent(prompt);
+  const text = result.response.text().trim();
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('AI yanıtı parse edilemedi');
   return JSON.parse(jsonMatch[0]);

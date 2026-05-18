@@ -4,15 +4,17 @@ const geminiService = require('./geminiService');
 const { checkVirusTotal, checkGoogleSafeBrowsing, buildScanLayers, applyScoreAdjustments } = require('./urlScanService');
 
 const heuristicAnalysis = (url, siteData) => {
-  const { hasSSL, isKnownBrand, domain, title } = siteData;
+  const { hasSSL, isKnownBrand, domain, title, reachable } = siteData;
 
   let score = 40;
   const layers = [];
 
-  // SSL kontrolü
-  if (hasSSL) {
+  // SSL kontrolü — erişilemeyen sitede SSL bonusu verilmez
+  if (hasSSL && reachable) {
     score += 20;
     layers.push({ name: 'SSL Güvenliği', result: 'Site HTTPS ile şifreli bağlantı kullanıyor.', status: 'ok' });
+  } else if (hasSSL && !reachable) {
+    layers.push({ name: 'SSL Güvenliği', result: 'URL HTTPS ile yazılmış ancak siteye ulaşılamadığından sertifika doğrulanamadı.', status: 'warning' });
   } else {
     score -= 15;
     layers.push({ name: 'SSL Güvenliği', result: 'Site HTTP kullanıyor, bağlantı şifrelenmemiş.', status: 'danger' });
@@ -35,14 +37,14 @@ const heuristicAnalysis = (url, siteData) => {
     layers.push({ name: 'İçerik Analizi', result: 'Domain adında belirgin şüpheli unsur bulunamadı.', status: 'ok' });
   }
 
-  // Sayfa başlığı
+  // Sayfa erişilebilirliği
   if (title) {
     layers.push({ name: 'Sayfa Erişilebilirliği', result: `Site yanıt verdi, başlık alındı: "${title.substring(0, 60)}".`, status: 'ok' });
-  } else if (isKnownBrand) {
-    layers.push({ name: 'Sayfa Erişilebilirliği', result: 'Site bot engellemesi kullanıyor. Büyük markalarda bu normaldir.', status: 'ok' });
+  } else if (reachable) {
+    layers.push({ name: 'Sayfa Erişilebilirliği', result: 'Site sunucusu aktif ve yanıt veriyor. Bot koruması nedeniyle içerik okunamadı, bu normal bir güvenlik önlemidir.', status: 'ok' });
   } else {
-    score -= 5;
-    layers.push({ name: 'Sayfa Erişilebilirliği', result: 'Siteye ulaşılamadı veya sayfa başlığı alınamadı.', status: 'warning' });
+    score -= 20;
+    layers.push({ name: 'Sayfa Erişilebilirliği', result: 'Siteye bağlantı kurulamadı. Site mevcut olmayabilir veya URL hatalı olabilir.', status: 'danger' });
   }
 
   score = Math.max(0, Math.min(100, score));
@@ -60,9 +62,6 @@ const heuristicAnalysis = (url, siteData) => {
 };
 
 const analyzeUrl = async (userId, url) => {
-  const cached = await safeShopModel.findByUrl(url);
-  if (cached) return cached.result;
-
   const [siteData, vtStats, gsbMatches] = await Promise.all([
     scrapingService.scrapeBasicInfo(url),
     checkVirusTotal(url),
@@ -91,14 +90,6 @@ const analyzeUrl = async (userId, url) => {
 
   // VT / GSB sonuçlarına göre skoru güncelle
   result = applyScoreAdjustments(result, vtStats, gsbMatches);
-
-  await safeShopModel.saveQuery({
-    userId,
-    url,
-    score: result.score,
-    level: result.level,
-    result,
-  });
 
   return result;
 };
