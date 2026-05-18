@@ -8,26 +8,42 @@ const getClient = () => {
   return genAI;
 };
 
-const getModel = () => getClient().getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+const getModel = () => getClient().getGenerativeModel({ model: 'gemini-2.5-flash' });
 
 const analyzeBudget = async (monthlyData, inflationData) => {
-  const prompt = `Sen bir Türk kişisel finans uzmanısın. Kullanıcının son 3 aylık harcama verisini analiz et.
+  const prompt = `Sen bir Türk kişisel finans uzmanısın. Kullanıcının bu aylık harcama verisini analiz et.
 
-Harcama verisi:
+Harcama verisi (bu ay):
 ${JSON.stringify(monthlyData, null, 2)}
 
 Enflasyon verisi:
 ${JSON.stringify(inflationData, null, 2)}
 
-Türkçe, 3-4 cümle pratik bir analiz yaz. Şunlara değin:
-- Hangi kategoride en fazla artış/azalış var
-- Enflasyona göre reel durum (tasarruf mu, kayıp mı)
-- Bir somut öneri
+Aşağıdaki JSON formatında yanıt ver. Başka hiçbir şey yazma, sadece JSON döndür:
+{
+  "alerts": [
+    {"type": "danger|warning|info", "message": "uyarı metni"}
+  ],
+  "insights": [
+    "içgörü cümlesi 1",
+    "içgörü cümlesi 2"
+  ],
+  "recommendation": "tek somut öneri cümlesi"
+}
 
-Sadece analiz metnini döndür, JSON veya başlık kullanma.`;
+Kurallar:
+- alerts: limit aşımı veya dikkat çekici durumlar (1-3 madde), yoksa boş dizi
+- insights: harcama dağılımı, enflasyona göre reel durum (2-4 madde)
+- recommendation: en faydalı tek öneri
+- Türkçe yaz, ₺ sembolü kullan`;
 
   const result = await getModel().generateContent(prompt);
-  return result.response.text().trim();
+  const text = result.response.text().trim();
+  const codeBlock = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const raw = codeBlock ? codeBlock[1].trim() : text;
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('AI yanıtı parse edilemedi');
+  return JSON.parse(m[0]);
 };
 
 const suggestCategory = async (note, amount) => {

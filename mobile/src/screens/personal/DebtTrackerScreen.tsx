@@ -8,7 +8,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors } from '../../constants/colors';
 import { theme } from '../../constants/theme';
-import { formatCurrency, formatShortDate } from '../../utils/formatters';
+import { formatCurrency, formatShortDate, formatMonth } from '../../utils/formatters';
+import { personalAPI } from '../../services/api';
 import Button from '../../components/common/Button';
 import EmptyState from '../../components/common/EmptyState';
 
@@ -51,13 +52,43 @@ export default function DebtTrackerScreen() {
       Alert.alert('Uyarı', 'Kişi adı ve tutar zorunludur');
       return;
     }
+    const parsed = parseFloat(amount);
+    if (parsed <= 0) {
+      Alert.alert('Uyarı', 'Tutar 0 veya negatif olamaz');
+      return;
+    }
+    const currentMonth = formatMonth();
+    const today = new Date().toISOString().split('T')[0];
+
+    if (formType === 'given') {
+      try {
+        const res = await personalAPI.getSummary(currentMonth);
+        const summary = (res as any).data;
+        const remaining = (summary.budget || 1000000) - (summary.total || 0);
+        if (parsed > remaining) {
+          Alert.alert('Yetersiz Bütçe', `Bu ay kalan bütçeniz ${remaining.toFixed(2)} ₺. Borç eklenemedi.`);
+          return;
+        }
+      } catch {}
+    }
+
     const d: Debt = {
       id: Date.now().toString(),
-      person, amount: parseFloat(amount), note,
-      date: new Date().toISOString().split('T')[0],
+      person, amount: parsed, note,
+      date: today,
       type: formType, paid: false,
     };
     await save([...debts, d]);
+
+    try {
+      await personalAPI.addEntry({
+        amount: formType === 'given' ? parsed : -parsed,
+        category: formType === 'given' ? 'Borç Verilen' : 'Borç Alınan',
+        date: today,
+        note: person + (note ? ` - ${note}` : ''),
+      });
+    } catch {}
+
     setPerson(''); setAmount(''); setNote('');
     setShowForm(false);
   };

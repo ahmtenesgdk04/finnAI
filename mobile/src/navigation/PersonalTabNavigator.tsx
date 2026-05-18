@@ -69,7 +69,7 @@ const TAB_LABELS: Record<string, string> = {
   Dashboard: 'Ana Sayfa',
   Budget: 'Bütçe',
   Coach: 'Koç',
-  Goals: 'Hedefler',
+  Goals: 'Birikim',
   Tools: 'Araçlar',
 };
 
@@ -99,7 +99,7 @@ export default function PersonalTabNavigator() {
       <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Ana Sayfa', headerShown: false }} />
       <Tab.Screen name="Budget" component={BudgetScreen} options={{ title: 'Bütçe' }} />
       <Tab.Screen name="Coach" component={CoachScreen} options={{ title: 'FinansKoç' }} />
-      <Tab.Screen name="Goals" component={SavingsGoalsScreen} options={{ title: 'Hedefler' }} />
+      <Tab.Screen name="Goals" component={SavingsGoalsScreen} options={{ title: 'Birikim' }} />
       <Tab.Screen name="Tools" component={ToolsNavigator} options={{ title: 'Araçlar', headerShown: false }} />
     </Tab.Navigator>
   );
