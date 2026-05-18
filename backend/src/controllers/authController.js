@@ -1,5 +1,45 @@
 const authService = require('../services/authService');
 
+const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'E-posta zorunludur' });
+    }
+    await authService.forgotPassword(email.toLowerCase().trim());
+    // Always 200 to prevent email enumeration
+    res.json({ success: true, message: 'Kod gönderildi' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const verifyOtp = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: 'E-posta ve kod zorunludur' });
+    }
+    const result = await authService.verifyOtp(email.toLowerCase().trim(), otp.trim());
+    res.json({ success: true, ...result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    const { resetToken, newPassword } = req.body;
+    if (!resetToken || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Token ve yeni şifre zorunludur' });
+    }
+    await authService.resetPassword(resetToken, newPassword);
+    res.json({ success: true, message: 'Şifre başarıyla sıfırlandı' });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const register = async (req, res, next) => {
   try {
     const { name, email, password, mode } = req.body;
@@ -70,4 +110,7 @@ const deleteAccount = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getMe, changePassword, updateProfile, deleteAccount };
+module.exports = {
+  register, login, getMe, changePassword, updateProfile, deleteAccount,
+  forgotPassword, verifyOtp, resetPassword,
+};

@@ -6,7 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../constants/colors';
-import { marketplaceAPI } from '../../services/api';
+import { marketplaceAPI, messagesAPI } from '../../services/api';
 
 type Listing = {
   id: string;
@@ -25,6 +25,8 @@ type Listing = {
   contact_preference: string[];
   status: 'active' | 'passive' | 'sold';
   created_at: string;
+  user_id?: string;
+  seller_name?: string;
 };
 
 const STATUS_INFO: Record<string, { label: string; color: string; bg: string }> = {
@@ -63,6 +65,8 @@ export default function IlanDetayScreen({ route, navigation }: { route: any; nav
   const [listing, setListing] = useState<Listing>(route.params.listing);
   const [statusLoading, setStatusLoading] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+  const [msgLoading, setMsgLoading] = useState(false);
+  const isOwner = route.params.isOwner !== false;
 
   const s = STATUS_INFO[listing.status];
   const dateStr = new Date(listing.created_at).toLocaleDateString('tr-TR', {
@@ -79,6 +83,26 @@ export default function IlanDetayScreen({ route, navigation }: { route: any; nav
       Alert.alert('Hata', 'Durum güncellenemedi.');
     } finally {
       setStatusLoading(false);
+    }
+  };
+
+  const handleMessage = async () => {
+    if (!listing.user_id) return;
+    setMsgLoading(true);
+    try {
+      const res = await messagesAPI.startOrGetConversation(listing.id, listing.user_id);
+      navigation.navigate('Mesajlar', {
+        screen: 'Chat',
+        params: {
+          conversationId: res.data.id,
+          listingTitle: listing.title,
+          otherName: listing.seller_name || 'Satıcı',
+        },
+      });
+    } catch {
+      Alert.alert('Hata', 'Mesaj başlatılamadı, tekrar deneyin.');
+    } finally {
+      setMsgLoading(false);
     }
   };
 
@@ -168,8 +192,28 @@ export default function IlanDetayScreen({ route, navigation }: { route: any; nav
           </Section>
         )}
 
-        {/* Aksiyonlar */}
-        <View style={styles.actions}>
+        {/* Aksiyonlar — alıcı */}
+        {!isOwner && listing.user_id && (
+          <View style={styles.actions}>
+            <TouchableOpacity
+              style={styles.msgBtn}
+              onPress={handleMessage}
+              disabled={msgLoading}
+            >
+              {msgLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <>
+                  <Ionicons name="chatbubble-outline" size={18} color="#fff" />
+                  <Text style={styles.msgBtnText}>Mesaj Gönder</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Aksiyonlar — ilan sahibi */}
+        {isOwner && <View style={styles.actions}>
           <TouchableOpacity
             style={styles.statusBtn}
             onPress={() => setMenuVisible(true)}
@@ -189,7 +233,7 @@ export default function IlanDetayScreen({ route, navigation }: { route: any; nav
             <Ionicons name="trash-outline" size={18} color={colors.danger} />
             <Text style={styles.deleteBtnText}>İlanı Sil</Text>
           </TouchableOpacity>
-        </View>
+        </View>}
       </ScrollView>
 
       {/* Durum Seçim Modal */}
@@ -300,6 +344,16 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 13, color: colors.business, fontWeight: '500' },
 
   actions: { gap: 10, marginTop: 4 },
+  msgBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    padding: 15,
+    borderRadius: 12,
+    backgroundColor: colors.business,
+  },
+  msgBtnText: { fontSize: 15, fontWeight: '600', color: '#fff' },
   statusBtn: {
     flexDirection: 'row',
     alignItems: 'center',

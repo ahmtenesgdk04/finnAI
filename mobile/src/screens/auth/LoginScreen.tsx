@@ -47,6 +47,9 @@ export default function LoginScreen() {
           />
           {error ? <Text style={styles.error}>{error}</Text> : null}
           <Button title="Giriş Yap" onPress={handleLogin} loading={loading} />
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+            <Text style={styles.link}>Şifremi unuttum</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
             <Text style={styles.link}>Hesabın yok mu? Kayıt Ol</Text>
           </TouchableOpacity>
