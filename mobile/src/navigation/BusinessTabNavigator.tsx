@@ -5,7 +5,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
-import { useAuth } from '../hooks/useAuth';
 import CashflowScreen from '../screens/business/CashflowScreen';
 import ExpenseAnalysisScreen from '../screens/business/ExpenseAnalysisScreen';
 import CollectionsScreen from '../screens/business/CollectionsScreen';
@@ -15,39 +14,12 @@ import IlanVerScreen from '../screens/business/IlanVerScreen';
 import IlanlarimScreen from '../screens/business/IlanlarimScreen';
 import IlanDetayScreen from '../screens/business/IlanDetayScreen';
 import IslemlerScreen from '../screens/business/IslemlerScreen';
+import DashboardScreen from '../screens/business/DashboardScreen';
 
 const Tab = createBottomTabNavigator();
 const AIStack = createNativeStackNavigator();
 const MarketStack = createNativeStackNavigator();
 
-function BusinessDashboard() {
-  const { logout, user } = useAuth();
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Hoş geldin 👋</Text>
-          <Text style={styles.name}>{user?.name || 'Kullanıcı'}</Text>
-        </View>
-        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-          <Text style={styles.logoutText}>Çıkış</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.modeTag}>
-        <Text style={styles.modeTagText}>🏢 İşletme Modu</Text>
-      </View>
-
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderEmoji}>🚀</Text>
-        <Text style={styles.placeholderTitle}>İşletme Dashboard'u</Text>
-        <Text style={styles.placeholderSub}>
-          Akıllı Gider Analizi, NakitRadar,{'\n'}TahsilatAI ve daha fazlası
-        </Text>
-      </View>
-    </SafeAreaView>
-  );
-}
 
 function PlaceholderScreen({ title }: { title: string }) {
   return (
@@ -202,7 +174,7 @@ export default function BusinessTabNavigator() {
     >
       <Tab.Screen
         name="Ana Sayfa"
-        component={BusinessDashboard}
+        component={DashboardScreen}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name="home-outline" size={size} color={color} />,
         }}
