@@ -3,7 +3,7 @@ const db = require('../config/database');
 exports.create = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { role, otherPartyName, productName, quantity, unit, unitPrice, currency, note } = req.body;
+    const { role, otherPartyName, productName, quantity, unit, unitPrice, currency, note, sellerId } = req.body;
 
     if (!role || !otherPartyName || !productName || !quantity || !unitPrice) {
       return res.status(400).json({ message: 'Zorunlu alanlar eksik.' });
@@ -19,6 +19,17 @@ exports.create = async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
       [userId, role, otherPartyName, productName, quantity, unit || null, unitPrice, currency || 'TRY', totalPrice, note || null]
     );
+
+    // Alıcı sipariş verirse satıcı hesabına da otomatik kayıt oluştur
+    if (role === 'buyer' && sellerId && sellerId !== userId) {
+      const buyerName = req.user.name || otherPartyName;
+      await db.query(
+        `INSERT INTO orders (user_id, role, other_party_name, product_name, quantity, unit, unit_price, currency, total_price, note)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [sellerId, 'seller', buyerName, productName, quantity, unit || null, unitPrice, currency || 'TRY', totalPrice, note || null]
+      );
+    }
+
     res.status(201).json(rows[0]);
   } catch (err) {
     res.status(500).json({ message: err.message });
