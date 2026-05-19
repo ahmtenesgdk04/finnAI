@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { View, Text, ScrollView, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, RefreshControl, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../constants/colors';
 import { theme } from '../../constants/theme';
@@ -29,7 +30,7 @@ interface RateItem { code: string; name: string; value: number }
 interface Section { title: string; items: RateItem[] }
 interface RatesData { sections: Section[]; updatedAt: string }
 
-export default function ExchangeRatesScreen() {
+export default function ExchangeRatesScreen({ navigation }: { navigation: any }) {
   const { data, loading, refetch } = useApi(
     useCallback(() => personalAPI.getExchangeRates(), [])
   );
@@ -42,46 +43,64 @@ export default function ExchangeRatesScreen() {
     : new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={loading} onRefresh={refetch} />}
-    >
+    <SafeAreaView style={styles.safe}>
       <View style={styles.header}>
-        <Ionicons name="time-outline" size={14} color={colors.text.muted} />
-        <Text style={styles.updatedText}>Son güncelleme: {updatedAt} · Aşağı çekerek yenile</Text>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.back}>
+          <Ionicons name="arrow-back" size={22} color={colors.text.primary} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Döviz Kurları</Text>
+        <View style={{ width: 36 }} />
       </View>
 
-      {ratesData?.sections.map((section) => (
-        <View key={section.title} style={styles.section}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
-          {section.items.map((item) => (
-            <View key={item.code} style={styles.rateCard}>
-              <Text style={styles.rateIcon}>{ICONS[item.code] || '💱'}</Text>
-              <View style={styles.rateInfo}>
-                <Text style={styles.rateCode}>{item.code}</Text>
-                <Text style={styles.rateName}>{item.name}</Text>
-              </View>
-              <Text style={styles.rateValue}>{formatValue(item.code, item.value)}</Text>
-            </View>
-          ))}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={refetch} />}
+      >
+        <View style={styles.updatedRow}>
+          <Ionicons name="time-outline" size={14} color={colors.text.muted} />
+          <Text style={styles.updatedText}>Son güncelleme: {updatedAt} · Aşağı çekerek yenile</Text>
         </View>
-      ))}
 
-      {!ratesData && !loading && (
-        <View style={styles.empty}>
-          <Ionicons name="trending-up-outline" size={48} color={colors.text.muted} />
-          <Text style={styles.emptyText}>Kur verisi bulunamadı</Text>
-        </View>
-      )}
-    </ScrollView>
+        {ratesData?.sections.map((section) => (
+          <View key={section.title} style={styles.section}>
+            <Text style={styles.sectionTitle}>{section.title}</Text>
+            {section.items.map((item) => (
+              <View key={item.code} style={styles.rateCard}>
+                <Text style={styles.rateIcon}>{ICONS[item.code] || '💱'}</Text>
+                <View style={styles.rateInfo}>
+                  <Text style={styles.rateCode}>{item.code}</Text>
+                  <Text style={styles.rateName}>{item.name}</Text>
+                </View>
+                <Text style={styles.rateValue}>{formatValue(item.code, item.value)}</Text>
+              </View>
+            ))}
+          </View>
+        ))}
+
+        {!ratesData && !loading && (
+          <View style={styles.empty}>
+            <Ionicons name="trending-up-outline" size={48} color={colors.text.muted} />
+            <Text style={styles.emptyText}>Kur verisi bulunamadı</Text>
+          </View>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: colors.background },
-  content: { padding: theme.spacing.md, paddingBottom: 32 },
+  safe: { flex: 1, backgroundColor: colors.background },
   header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 14,
+    backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  back: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { fontSize: 17, fontWeight: '700', color: colors.text.primary },
+  scroll: { flex: 1 },
+  content: { padding: theme.spacing.md, paddingBottom: 32 },
+  updatedRow: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     justifyContent: 'flex-end', marginBottom: theme.spacing.md,
   },

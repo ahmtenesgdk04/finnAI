@@ -29,7 +29,7 @@ const TOOL_SECTIONS: { title: string; items: NavRow[] }[] = [
     items: [
       { label: 'Rehber', desc: 'Müşteri ve tedarikçi kişileri', icon: 'people-outline', iconBg: '#EFF6FF', iconColor: colors.business, screen: 'Rehber' },
       { label: 'Belgelerim', desc: 'Fatura ve evrak kasası', icon: 'folder-outline', iconBg: '#FEF3C7', iconColor: '#D97706', screen: 'Belgelerim' },
-      { label: 'Takvim', desc: 'Vade ve hatırlatıcılar', icon: 'calendar-outline', iconBg: '#F0FDF4', iconColor: '#16A34A', screen: 'Takvim' },
+      { label: 'Ajanda', desc: 'Görevler ve hatırlatıcılar', icon: 'calendar-outline', iconBg: '#F0FDF4', iconColor: '#16A34A', screen: 'Takvim' },
       { label: 'Gelir / Gider', desc: 'Detaylı gelir-gider kaydı', icon: 'stats-chart-outline', iconBg: '#EDE9FE', iconColor: '#7C3AED', screen: 'GelirGider' },
       { label: 'Hesap Makinesi', desc: 'Finansal hesaplama araçları', icon: 'calculator-outline', iconBg: '#FFF7ED', iconColor: '#EA580C', screen: 'HesapMakinesi' },
     ],
