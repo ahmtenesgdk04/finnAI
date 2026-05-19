@@ -111,6 +111,16 @@ CREATE TABLE IF NOT EXISTS marketplace_listings (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS user_income (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount NUMERIC(12,2) NOT NULL,
+  description VARCHAR(100),
+  month VARCHAR(7) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_income_user_month ON user_income(user_id, month);
 CREATE INDEX IF NOT EXISTS idx_personal_expenses_user_date ON personal_expenses(user_id, date);
 CREATE INDEX IF NOT EXISTS idx_savings_goals_user ON savings_goals(user_id);
 CREATE INDEX IF NOT EXISTS idx_coach_progress_user ON coach_progress(user_id);

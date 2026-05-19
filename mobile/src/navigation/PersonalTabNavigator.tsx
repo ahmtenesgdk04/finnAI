@@ -17,6 +17,7 @@ import ShopCheckScreen from '../screens/personal/ShopCheckScreen';
 import HealthScoreScreen from '../screens/shared/HealthScoreScreen';
 import ExchangeRatesScreen from '../screens/shared/ExchangeRatesScreen';
 import ProfileScreen from '../screens/personal/ProfileScreen';
+import IncomeBudgetScreen from '../screens/personal/IncomeBudgetScreen';
 
 export type PersonalTabParamList = {
   Dashboard: undefined;
@@ -35,6 +36,7 @@ export type ToolsStackParamList = {
   HealthScore: undefined;
   ExchangeRates: undefined;
   Profile: undefined;
+  IncomeBudget: undefined;
 };
 
 const Tab = createBottomTabNavigator<PersonalTabParamList>();
@@ -51,6 +53,7 @@ function ToolsNavigator() {
       <ToolsStack.Screen name="HealthScore" component={HealthScoreScreen} options={{ title: 'Finansal Sağlık' }} />
       <ToolsStack.Screen name="ExchangeRates" component={ExchangeRatesScreen} options={{ title: 'Döviz' }} />
       <ToolsStack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profilim' }} />
+      <ToolsStack.Screen name="IncomeBudget" component={IncomeBudgetScreen} options={{ headerShown: false }} />
     </ToolsStack.Navigator>
   );
 }
@@ -59,7 +62,7 @@ type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
 const TAB_ICONS: Record<string, { active: IoniconName; inactive: IoniconName }> = {
   Dashboard: { active: 'home', inactive: 'home-outline' },
-  Budget: { active: 'wallet', inactive: 'wallet-outline' },
+  Budget: { active: 'add-circle', inactive: 'add-circle-outline' },
   Coach: { active: 'school', inactive: 'school-outline' },
   Goals: { active: 'flag', inactive: 'flag-outline' },
   Tools: { active: 'apps', inactive: 'apps-outline' },
@@ -67,7 +70,7 @@ const TAB_ICONS: Record<string, { active: IoniconName; inactive: IoniconName }> 
 
 const TAB_LABELS: Record<string, string> = {
   Dashboard: 'Ana Sayfa',
-  Budget: 'Bütçe',
+  Budget: 'Gider',
   Coach: 'Koç',
   Goals: 'Birikim',
   Tools: 'Araçlar',
@@ -97,7 +100,7 @@ export default function PersonalTabNavigator() {
       })}
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Ana Sayfa', headerShown: false }} />
-      <Tab.Screen name="Budget" component={BudgetScreen} options={{ title: 'Bütçe' }} />
+      <Tab.Screen name="Budget" component={BudgetScreen} options={{ title: 'Gider' }} />
       <Tab.Screen name="Coach" component={CoachScreen} options={{ title: 'FinansKoç' }} />
       <Tab.Screen name="Goals" component={SavingsGoalsScreen} options={{ title: 'Birikim' }} />
       <Tab.Screen name="Tools" component={ToolsNavigator} options={{ title: 'Araçlar', headerShown: false }} />

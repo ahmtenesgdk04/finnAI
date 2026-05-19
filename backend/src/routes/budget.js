@@ -3,6 +3,7 @@ const { verifyToken } = require('../middleware/auth');
 const { aiLimiter } = require('../middleware/rateLimiter');
 const expCtrl = require('../controllers/expenseController');
 const budgetCtrl = require('../controllers/budgetController');
+const incomeCtrl = require('../controllers/incomeController');
 
 // Harcama girişi
 router.post('/entry', verifyToken, expCtrl.addEntry);
@@ -13,6 +14,11 @@ router.post('/limit', verifyToken, budgetCtrl.setLimit);
 
 // AI analiz
 router.post('/analyze', verifyToken, aiLimiter, budgetCtrl.analyzeBudget);
+
+// Manuel gelir / bütçe
+router.post('/income', verifyToken, incomeCtrl.addIncome);
+router.get('/income', verifyToken, incomeCtrl.getIncome);
+router.delete('/income/:id', verifyToken, incomeCtrl.deleteIncome);
 
 // Birikim hedefleri
 router.post('/goals', verifyToken, budgetCtrl.createGoal);

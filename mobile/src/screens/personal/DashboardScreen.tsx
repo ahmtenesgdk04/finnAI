@@ -93,17 +93,18 @@ export default function DashboardScreen() {
         <Text style={styles.sectionTitle}>Hızlı İşlemler</Text>
         <View style={styles.actions}>
           {[
-            { icon: 'add-circle-outline', label: '+ Harcama', screen: 'Budget' },
-            { icon: 'flag-outline', label: '+ Birikim', screen: 'Goals' },
-            { icon: 'school-outline', label: "Koç'a Sor", screen: 'Coach' },
+            { icon: 'wallet-outline', label: '+ Bütçe', screen: 'Tools', params: { screen: 'IncomeBudget' } },
+            { icon: 'add-circle-outline', label: '+ Gider', screen: 'Budget', params: undefined },
+            { icon: 'flag-outline', label: '+ Birikim', screen: 'Goals', params: undefined },
+            { icon: 'school-outline', label: "Koç'a Sor", screen: 'Coach', params: undefined },
           ].map((a) => (
             <TouchableOpacity
               key={a.label}
               style={styles.actionBtn}
-              onPress={() => navigation.navigate(a.screen)}
+              onPress={() => navigation.navigate(a.screen as any, a.params as any)}
             >
               <Ionicons name={a.icon as any} size={26} color={colors.personal} />
-              <Text style={styles.actionLabel}>{a.label}</Text>
+              <Text style={styles.actionLabel} numberOfLines={1}>{a.label}</Text>
             </TouchableOpacity>
           ))}
         </View>

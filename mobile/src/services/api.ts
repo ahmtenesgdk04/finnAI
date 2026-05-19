@@ -73,6 +73,13 @@ export const personalAPI = {
 
   getHealthScore: () => api.get('/api/health-score'),
   getExchangeRates: () => api.get('/api/exchange-rates'),
+
+  addIncome: (data: { amount: number; description?: string; month?: string }) =>
+    api.post('/api/budget/income', data),
+  getIncome: (month?: string) =>
+    api.get('/api/budget/income', { params: month ? { month } : undefined }),
+  deleteIncome: (id: string) =>
+    api.delete(`/api/budget/income/${id}`),
 };
 
 export const businessAPI = {
