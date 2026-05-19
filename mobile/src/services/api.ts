@@ -110,6 +110,8 @@ export const businessAPI = {
 
   getSummaryByRange: (start: string, end: string) =>
     api.get('/api/cashflow/summary-by-range', { params: { start, end } }),
+  deleteEntry: (type: 'income' | 'expense', id: string) =>
+    api.delete(`/api/cashflow/entry/${type}/${id}`),
 };
 
 export const marketplaceAPI = {

@@ -207,10 +207,10 @@ export default function BusinessTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="İşlemler"
+        name="Muhasebe"
         component={IslemlerScreen}
         options={{
-          tabBarIcon: ({ color, size }) => <Ionicons name="swap-horizontal-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen

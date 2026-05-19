@@ -11,6 +11,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { colors } from '../../constants/colors';
 import { businessAPI } from '../../services/api';
 
+let muhasebeTabSeen = false;
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const MONTHS_TR = [
@@ -36,7 +38,10 @@ const prevMY = ({ year, month }: MonthYear): MonthYear =>
 const nextMY = ({ year, month }: MonthYear): MonthYear =>
   month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 };
 
-const todayISO = () => new Date().toISOString().split('T')[0];
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -73,6 +78,7 @@ export default function IslemlerScreen() {
   const [note,         setNote]         = useState('');
   const [photo,        setPhoto]        = useState<string | null>(null);
   const [saving,       setSaving]       = useState(false);
+  const [tipVisible,   setTipVisible]   = useState(false);
 
   const fetchData = async (my: MonthYear) => {
     try {
@@ -89,6 +95,10 @@ export default function IslemlerScreen() {
   useFocusEffect(useCallback(() => {
     setLoading(true);
     fetchData(curMonth);
+    if (!muhasebeTabSeen) {
+      muhasebeTabSeen = true;
+      setTipVisible(true);
+    }
   }, []));
 
   const goMonth = (my: MonthYear) => {
@@ -144,8 +154,60 @@ export default function IslemlerScreen() {
   const net       = data.totalIncome - data.totalExpense;
   const categories = entryType === 'income' ? INCOME_SOURCES : EXPENSE_CATEGORIES;
 
+  const handleDelete = (item: Entry) => {
+    Alert.alert(
+      'Kaydı Sil',
+      `"${item.label}" kaydını silmek istediğinize emin misiniz?`,
+      [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: 'Sil', style: 'destructive',
+          onPress: async () => {
+            try {
+              await businessAPI.deleteEntry(item.type, item.id);
+              setData(prev => ({
+                ...prev,
+                totalIncome:   item.type === 'income'  ? prev.totalIncome  - item.amount : prev.totalIncome,
+                totalExpense:  item.type === 'expense' ? prev.totalExpense - item.amount : prev.totalExpense,
+                entries: prev.entries.filter(e => e.id !== item.id),
+              }));
+            } catch {
+              Alert.alert('Hata', 'Kayıt silinemedi.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const dismissTip = () => setTipVisible(false);
+
   return (
     <SafeAreaView style={styles.safe}>
+      {/* ── Tek seferlik ipucu ── */}
+      <Modal visible={tipVisible} transparent animationType="fade" onRequestClose={dismissTip}>
+        <View style={styles.tipBackdrop}>
+          <View style={styles.tipCard}>
+            <View style={styles.tipIconRow}>
+              <View style={styles.tipIconBg}>
+                <Ionicons name="information-circle-outline" size={28} color={colors.business} />
+              </View>
+            </View>
+            <Text style={styles.tipTitle}>Bu ekran ne işe yarar?</Text>
+            <Text style={styles.tipBody}>
+              Burada aylık gelir ve giderlerinizi elle kaydedip takip edebilirsiniz.{'\n\n'}
+              Nakit akışı tahmini ve otomatik analiz için{' '}
+              <Text style={styles.tipHighlight}>NakitRadar</Text>'ı,
+              gider optimizasyonu ve tahsilat takibi için{' '}
+              <Text style={styles.tipHighlight}>AI Araçlar</Text>'ı kullanabilirsiniz.
+            </Text>
+            <TouchableOpacity style={styles.tipBtn} onPress={dismissTip}>
+              <Text style={styles.tipBtnText}>Anladım</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       {/* ── Header ── */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -188,15 +250,19 @@ export default function IslemlerScreen() {
           {/* ── Özet kartlar ── */}
           <View style={styles.summaryRow}>
             <View style={[styles.summaryCard, { borderTopColor: '#10B981' }]}>
-              <Ionicons name="arrow-up-circle-outline" size={18} color="#10B981" style={{ marginBottom: 6 }} />
-              <Text style={styles.summaryLabel}>Toplam Gelir</Text>
+              <View style={styles.summaryHeader}>
+                <Ionicons name="arrow-up-circle-outline" size={18} color="#10B981" />
+                <Text style={styles.summaryLabel}>Toplam Gelir</Text>
+              </View>
               <Text style={[styles.summaryAmount, { color: '#10B981' }]}>
                 {data.totalIncome.toLocaleString('tr-TR')} ₺
               </Text>
             </View>
             <View style={[styles.summaryCard, { borderTopColor: colors.danger }]}>
-              <Ionicons name="arrow-down-circle-outline" size={18} color={colors.danger} style={{ marginBottom: 6 }} />
-              <Text style={styles.summaryLabel}>Toplam Gider</Text>
+              <View style={styles.summaryHeader}>
+                <Ionicons name="arrow-down-circle-outline" size={18} color={colors.danger} />
+                <Text style={styles.summaryLabel}>Toplam Gider</Text>
+              </View>
               <Text style={[styles.summaryAmount, { color: colors.danger }]}>
                 {data.totalExpense.toLocaleString('tr-TR')} ₺
               </Text>
@@ -243,6 +309,9 @@ export default function IslemlerScreen() {
                         </Text>
                         <Text style={styles.entryDate}>{dateStr}</Text>
                       </View>
+                      <TouchableOpacity onPress={() => handleDelete(item)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                        <Ionicons name="trash-outline" size={16} color={colors.text.muted} />
+                      </TouchableOpacity>
                     </View>
                     {i < data.entries.length - 1 && <View style={styles.divider} />}
                   </View>
@@ -370,6 +439,7 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: colors.card, borderRadius: 14, padding: 14, borderTopWidth: 3,
     shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 3,
   },
+  summaryHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
   summaryLabel:  { fontSize: 11, color: colors.text.secondary, fontWeight: '500' },
   summaryAmount: { fontSize: 15, fontWeight: '700', marginTop: 2 },
 
@@ -438,4 +508,32 @@ const styles = StyleSheet.create({
 
   saveBtn:     { backgroundColor: colors.business, borderRadius: 12, padding: 15, alignItems: 'center', marginTop: 12 },
   saveBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+
+  tipBackdrop: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 28,
+  },
+  tipCard: {
+    backgroundColor: colors.card,
+    borderRadius: 20,
+    paddingHorizontal: 24, paddingTop: 28, paddingBottom: 24,
+    width: '100%',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.18, shadowRadius: 20, elevation: 10,
+  },
+  tipIconRow: { alignItems: 'center', marginBottom: 16 },
+  tipIconBg: {
+    width: 56, height: 56, borderRadius: 28,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  tipTitle: { fontSize: 18, fontWeight: '700', color: colors.text.primary, textAlign: 'center', marginBottom: 12 },
+  tipBody:  { fontSize: 14, color: colors.text.secondary, lineHeight: 22, textAlign: 'center', marginBottom: 24 },
+  tipHighlight: { color: colors.business, fontWeight: '700' },
+  tipBtn: {
+    backgroundColor: colors.business, borderRadius: 12,
+    paddingVertical: 14, alignItems: 'center',
+  },
+  tipBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
 });

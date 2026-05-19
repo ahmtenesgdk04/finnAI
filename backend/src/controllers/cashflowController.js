@@ -58,4 +58,18 @@ const summaryByRange = async (req, res, next) => {
   }
 };
 
-module.exports = { forecast, summary, addExpense, addIncome, analyzeExpenses, summaryByRange };
+const deleteEntry = async (req, res, next) => {
+  try {
+    const { type, id } = req.params;
+    if (!['income', 'expense'].includes(type)) return res.status(400).json({ error: 'Geçersiz tür.' });
+    const deleted = type === 'expense'
+      ? await cashflowModel.deleteExpense(req.user.id, id)
+      : await cashflowModel.deleteIncome(req.user.id, id);
+    if (!deleted) return res.status(404).json({ error: 'Kayıt bulunamadı.' });
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { forecast, summary, addExpense, addIncome, analyzeExpenses, summaryByRange, deleteEntry };
