@@ -79,6 +79,7 @@ export const personalAPI = {
 
   getHealthScore: () => api.get('/api/health-score'),
   getExchangeRates: () => api.get('/api/exchange-rates'),
+  getExchangeRateHistory: (code: string) => api.get(`/api/exchange-rates/${code}/history`),
 };
 
 export const businessAPI = {
