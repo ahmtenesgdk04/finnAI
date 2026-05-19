@@ -220,6 +220,7 @@ export default function IlanDetayScreen({ route, navigation }: { route: any; nav
         unitPrice: Number(listing.unit_price),
         currency: listing.currency,
         note: noteparts.join(' — '),
+        sellerId: listing.user_id,
       });
       resetOrder();
       Alert.alert('Sipariş Oluşturuldu', '"Siparişlerim" bölümünden takip edebilirsiniz.');

@@ -160,6 +160,7 @@ export const ordersAPI = {
     unitPrice: number;
     currency?: string;
     note?: string;
+    sellerId?: string;
   }) => api.post('/api/orders', data),
   getOrders: (role?: 'buyer' | 'seller') =>
     api.get('/api/orders', { params: role ? { role } : undefined }),
