@@ -1,5 +1,14 @@
 const budgetService = require('../services/budgetService');
 
+const getLimits = async (req, res, next) => {
+  try {
+    const limits = await budgetService.getLimits(req.user.id);
+    res.json({ success: true, limits });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const setLimit = async (req, res, next) => {
   try {
     const { category, monthlyLimit } = req.body;
@@ -64,4 +73,4 @@ const deleteGoal = async (req, res, next) => {
   }
 };
 
-module.exports = { setLimit, analyzeBudget, createGoal, getGoals, updateGoal, deleteGoal };
+module.exports = { getLimits, setLimit, analyzeBudget, createGoal, getGoals, updateGoal, deleteGoal };

@@ -13,6 +13,7 @@ const SECTIONS = [
     title: 'Finansal Araçlar',
     items: [
       { label: 'Bütçem', icon: 'wallet-outline' as const, screen: 'IncomeBudget' as const, desc: 'Aylık gelirini ve bütçeni gir' },
+      { label: 'Kategori Limitleri', icon: 'options-outline' as const, screen: 'LimitSettings' as const, desc: 'Kategori bazlı harcama limitleri' },
       { label: 'Abonelikler', icon: 'card-outline' as const, screen: 'Subscriptions' as const, desc: 'Aylık aboneliklerini takip et' },
       { label: 'Borçlarım', icon: 'trending-down-outline' as const, screen: 'Debt' as const, desc: 'Borç ve alacaklarını yönet' },
       { label: 'Taksitler', icon: 'calendar-outline' as const, screen: 'Installments' as const, desc: 'Taksitli ödemelerin' },

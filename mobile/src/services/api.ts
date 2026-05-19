@@ -52,6 +52,7 @@ export const personalAPI = {
     api.get(`/api/expenses/analyze${month ? `?month=${month}` : ''}`),
   analyzeBudget: () =>
     api.post('/api/budget/analyze'),
+  getLimits: () => api.get('/api/budget/limit'),
   setLimit: (data: { category: string; monthlyLimit: number }) =>
     api.post('/api/budget/limit', data),
 

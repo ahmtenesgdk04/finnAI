@@ -10,6 +10,7 @@ router.post('/entry', verifyToken, expCtrl.addEntry);
 router.get('/summary', verifyToken, expCtrl.getSummary);
 
 // Bütçe limiti
+router.get('/limit', verifyToken, budgetCtrl.getLimits);
 router.post('/limit', verifyToken, budgetCtrl.setLimit);
 
 // AI analiz

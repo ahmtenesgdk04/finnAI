@@ -18,6 +18,7 @@ import HealthScoreScreen from '../screens/shared/HealthScoreScreen';
 import ExchangeRatesScreen from '../screens/shared/ExchangeRatesScreen';
 import ProfileScreen from '../screens/personal/ProfileScreen';
 import IncomeBudgetScreen from '../screens/personal/IncomeBudgetScreen';
+import LimitSettingsScreen from '../screens/personal/LimitSettingsScreen';
 
 export type PersonalTabParamList = {
   Dashboard: undefined;
@@ -37,6 +38,7 @@ export type ToolsStackParamList = {
   ExchangeRates: undefined;
   Profile: undefined;
   IncomeBudget: undefined;
+  LimitSettings: undefined;
 };
 
 const Tab = createBottomTabNavigator<PersonalTabParamList>();
@@ -54,6 +56,7 @@ function ToolsNavigator() {
       <ToolsStack.Screen name="ExchangeRates" component={ExchangeRatesScreen} options={{ title: 'Döviz' }} />
       <ToolsStack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profilim' }} />
       <ToolsStack.Screen name="IncomeBudget" component={IncomeBudgetScreen} options={{ headerShown: false }} />
+      <ToolsStack.Screen name="LimitSettings" component={LimitSettingsScreen} options={{ headerShown: false }} />
     </ToolsStack.Navigator>
   );
 }

@@ -4,6 +4,8 @@ const geminiService = require('./geminiService');
 const inflationService = require('./inflationService');
 const { monthRange, formatMonth } = require('../utils/helpers');
 
+const getLimits = async (userId) => budgetModel.getLimits(userId);
+
 const setLimit = async (userId, category, monthlyLimit) => {
   return budgetModel.setLimit(userId, category, monthlyLimit);
 };
@@ -28,4 +30,4 @@ const getGoals = async (userId) => budgetModel.getGoals(userId);
 const updateGoal = async (id, userId, fields) => budgetModel.updateGoal(id, userId, fields);
 const deleteGoal = async (id, userId) => budgetModel.deleteGoal(id, userId);
 
-module.exports = { setLimit, analyzeBudget, createGoal, getGoals, updateGoal, deleteGoal };
+module.exports = { getLimits, setLimit, analyzeBudget, createGoal, getGoals, updateGoal, deleteGoal };
