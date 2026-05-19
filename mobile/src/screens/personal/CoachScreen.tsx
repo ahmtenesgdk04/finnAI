@@ -301,88 +301,29 @@ const CURRICULUM: LevelData[] = [
   },
 ];
 
-// ---- LessonModal ----
-function LessonModal({
-  lesson,
-  visible,
-  onClose,
-  onComplete,
-}: {
-  lesson: Lesson;
-  visible: boolean;
-  onClose: () => void;
-  onComplete: () => void;
-}) {
-  const [showQuiz, setShowQuiz] = useState(false);
-
-  useEffect(() => {
-    if (!visible) setShowQuiz(false);
-  }, [visible]);
-
-  if (showQuiz) {
-    return (
-      <QuizModal
-        visible={visible}
-        questions={lesson.quiz}
-        xp={50}
-        onComplete={() => { onComplete(); }}
-        onClose={onClose}
-      />
-    );
-  }
-
-  return (
-    <Modal visible={visible} animationType="slide" statusBarTranslucent>
-      <SafeAreaView style={lStyles.safe}>
-        <View style={lStyles.header}>
-          <TouchableOpacity onPress={onClose} style={lStyles.backBtn}>
-            <Ionicons name="arrow-back" size={22} color={colors.text.primary} />
-          </TouchableOpacity>
-          <Text style={lStyles.title} numberOfLines={1}>{lesson.title}</Text>
-          <View style={{ width: 36 }} />
-        </View>
-        <ScrollView style={lStyles.scroll} contentContainerStyle={lStyles.scrollContent}>
-          <Text style={lStyles.content}>{lesson.content}</Text>
-        </ScrollView>
-        <View style={lStyles.footer}>
-          <TouchableOpacity style={lStyles.quizBtn} onPress={() => setShowQuiz(true)}>
-            <Ionicons name="help-circle-outline" size={20} color="#fff" />
-            <Text style={lStyles.quizBtnText}>Quize Başla</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    </Modal>
-  );
-}
-
-const lStyles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 16, paddingVertical: 14,
-    backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
-  },
-  backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-  title: { flex: 1, fontSize: 17, fontWeight: '700', color: colors.text.primary, textAlign: 'center' },
-  scroll: { flex: 1 },
-  scrollContent: { padding: 20, paddingBottom: 8 },
-  content: { fontSize: 15, color: colors.text.primary, lineHeight: 26 },
-  footer: { padding: 16, paddingBottom: 24, backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border },
-  quizBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    backgroundColor: colors.personal, borderRadius: 14, paddingVertical: 15,
-  },
-  quizBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
-});
 
 // ---- CoachScreen ----
 export default function CoachScreen() {
   const [completed, setCompleted] = useState<string[]>([]);
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
+  const [showContent, setShowContent] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState('');
   const [asking, setAsking] = useState(false);
+
+  const openLesson = (lesson: Lesson) => {
+    setActiveLesson(lesson);
+    setShowContent(true);
+    setShowQuiz(false);
+  };
+
+  const closeAll = () => {
+    setShowContent(false);
+    setShowQuiz(false);
+    setActiveLesson(null);
+  };
 
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY).then(saved => {
@@ -511,7 +452,7 @@ export default function CoachScreen() {
                           <TouchableOpacity
                             key={lesson.id}
                             style={styles.lessonRow}
-                            onPress={() => setActiveLesson(lesson)}
+                            onPress={() => openLesson(lesson)}
                             activeOpacity={0.7}
                           >
                             <Ionicons
@@ -575,20 +516,88 @@ export default function CoachScreen() {
         <View style={{ height: 32 }} />
       </ScrollView>
 
+      {/* Ders İçeriği Modalı */}
+      <Modal visible={showContent} animationType="slide" statusBarTranslucent>
+        <SafeAreaView style={mStyles.safe}>
+          <View style={mStyles.header}>
+            <TouchableOpacity onPress={closeAll} style={mStyles.backBtn}>
+              <Ionicons name="arrow-back" size={22} color={colors.text.primary} />
+            </TouchableOpacity>
+            <Text style={mStyles.headerTitle} numberOfLines={1}>
+              {activeLesson?.title ?? ''}
+            </Text>
+            <View style={{ width: 36 }} />
+          </View>
+
+          <ScrollView style={mStyles.scroll} contentContainerStyle={mStyles.scrollContent}
+            showsVerticalScrollIndicator={false}>
+            <View style={mStyles.lessonBadge}>
+              <Ionicons name="book-outline" size={14} color={colors.personal} />
+              <Text style={mStyles.lessonBadgeText}>Ders İçeriği</Text>
+            </View>
+            <Text style={mStyles.lessonTitle}>{activeLesson?.title ?? ''}</Text>
+            <Text style={mStyles.lessonContent}>{activeLesson?.content ?? ''}</Text>
+          </ScrollView>
+
+          <View style={mStyles.footer}>
+            <TouchableOpacity
+              style={mStyles.quizBtn}
+              onPress={() => { setShowContent(false); setShowQuiz(true); }}
+            >
+              <Ionicons name="help-circle-outline" size={20} color="#fff" />
+              <Text style={mStyles.quizBtnText}>Quize Geç</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
+
+      {/* Quiz Modalı */}
       {activeLesson && (
-        <LessonModal
-          lesson={activeLesson}
-          visible
-          onClose={() => setActiveLesson(null)}
+        <QuizModal
+          visible={showQuiz}
+          questions={activeLesson.quiz}
+          xp={50}
           onComplete={() => {
             markComplete(activeLesson.id);
-            setActiveLesson(null);
+            closeAll();
           }}
+          onClose={closeAll}
         />
       )}
     </KeyboardAvoidingView>
   );
 }
+
+const mStyles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.background },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingVertical: 14,
+    backgroundColor: colors.card, borderBottomWidth: 1, borderBottomColor: colors.border,
+  },
+  backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { flex: 1, fontSize: 17, fontWeight: '700', color: colors.text.primary, textAlign: 'center' },
+  scroll: { flex: 1 },
+  scrollContent: { padding: 20, paddingBottom: 12 },
+  lessonBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: '#EDE9FE', borderRadius: 20,
+    paddingHorizontal: 12, paddingVertical: 5,
+    alignSelf: 'flex-start', marginBottom: 14,
+  },
+  lessonBadgeText: { fontSize: 12, fontWeight: '600', color: colors.personal },
+  lessonTitle: { fontSize: 20, fontWeight: '800', color: colors.text.primary, marginBottom: 16, lineHeight: 28 },
+  lessonContent: { fontSize: 15, color: colors.text.primary, lineHeight: 27 },
+  footer: {
+    padding: 16, paddingBottom: 24,
+    backgroundColor: colors.card, borderTopWidth: 1, borderTopColor: colors.border,
+  },
+  quizBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: colors.personal, borderRadius: 14, paddingVertical: 15,
+  },
+  quizBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
+});
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
