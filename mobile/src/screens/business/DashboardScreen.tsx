@@ -67,11 +67,8 @@ const daysInMonth = ({ year, month }: MonthYear): number =>
 const fmt = (n: number) =>
   n.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 });
 
-const fmtStat = (n: number): string => {
-  if (n >= 1_000_000) return `₺${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `₺${(n / 1_000).toFixed(1)}K`;
-  return `₺${Math.round(n)}`;
-};
+const fmtStat = (n: number): string =>
+  n.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY', maximumFractionDigits: 0 });
 
 const fmtDate = (dateStr: string): string => {
   const d = (dateStr || '').split('T')[0];
@@ -141,7 +138,7 @@ export default function DashboardScreen() {
 
   const today = new Date().toISOString().split('T')[0];
   const overdue = collections.filter(c => !c.paid && c.due_date < today);
-  const pendingCount = collections.filter(c => !c.paid).length;
+  const totalOutstanding = collections.filter(c => !c.paid).reduce((s, c) => s + Number(c.amount), 0);
 
   const totalIncome = summary?.totalIncome ?? 0;
   const totalExpense = summary?.totalExpense ?? 0;
@@ -225,8 +222,8 @@ export default function DashboardScreen() {
               </View>
               <View style={[styles.statCard, { borderTopColor: colors.warning }]}>
                 <Ionicons name="time-outline" size={22} color={colors.warning} />
-                <Text style={styles.statLabel}>Tahsilat</Text>
-                <Text style={[styles.statAmount, { color: colors.warning }]}>{pendingCount} adet</Text>
+                <Text style={styles.statLabel}>Alacak</Text>
+                <Text style={[styles.statAmount, { color: colors.warning }]}>{fmtStat(totalOutstanding)}</Text>
               </View>
             </View>
 
@@ -235,7 +232,7 @@ export default function DashboardScreen() {
               <View style={styles.alert}>
                 <Ionicons name="warning-outline" size={18} color={colors.danger} />
                 <Text style={styles.alertText}>
-                  {overdue.length} tahsilatın vadesi geçti — toplam {fmt(overdue.reduce((s, c) => s + Number(c.amount), 0))}
+                  {overdue.length} alacağın vadesi geçti — toplam {fmt(overdue.reduce((s, c) => s + Number(c.amount), 0))}
                 </Text>
               </View>
             )}
