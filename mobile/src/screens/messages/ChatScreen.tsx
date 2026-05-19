@@ -105,7 +105,7 @@ export default function ChatScreen({ route, navigation }: { route: any; navigati
     <SafeAreaView style={styles.safe}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => navigation.navigate('Conversations')} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={22} color={colors.text.primary} />
         </TouchableOpacity>
         <View style={styles.headerInfo}>
