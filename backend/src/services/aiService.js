@@ -6,13 +6,30 @@ const getClient = () => {
   return client;
 };
 
+const MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite'];
+
 const generateText = async (prompt, maxOutputTokens = 8192) => {
-  const model = getClient().getGenerativeModel({
-    model: 'gemini-2.5-flash',
-    generationConfig: { maxOutputTokens },
-  });
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+  for (const modelName of MODELS) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const model = getClient().getGenerativeModel({
+          model: modelName,
+          generationConfig: { maxOutputTokens },
+        });
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+      } catch (err) {
+        const status = err?.status ?? err?.response?.status;
+        if (status === 503 && attempt < 2) {
+          await new Promise(r => setTimeout(r, (attempt + 1) * 2000));
+          continue;
+        }
+        if (status === 503 || status === 429) break;
+        throw err;
+      }
+    }
+  }
+  throw new Error('AI servisi şu an kullanılamıyor, lütfen daha sonra tekrar deneyin.');
 };
 
 const parseJSON = (text) => {
