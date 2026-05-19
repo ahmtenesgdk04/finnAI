@@ -163,14 +163,14 @@ function RateDetailModal({
           {history && history.length >= 2 && (
             <View style={modal.statsRow}>
               <View style={modal.stat}>
-                <Text style={modal.statLabel}>30g En Düşük</Text>
-                <Text style={modal.statVal}>
+                <Text style={modal.statLabel}>30 Günlük Min</Text>
+                <Text style={modal.statVal} numberOfLines={1} adjustsFontSizeToFit>
                   {formatValue(item.code, Math.min(...history.map((h) => h.value)))}
                 </Text>
               </View>
               <View style={modal.stat}>
-                <Text style={modal.statLabel}>30g En Yüksek</Text>
-                <Text style={modal.statVal}>
+                <Text style={modal.statLabel}>30 Günlük Maks</Text>
+                <Text style={modal.statVal} numberOfLines={1} adjustsFontSizeToFit>
                   {formatValue(item.code, Math.max(...history.map((h) => h.value)))}
                 </Text>
               </View>
@@ -210,11 +210,13 @@ export default function ExchangeRatesScreen({ navigation }: { navigation: any })
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refetch} />}
       >
-        <View style={styles.updatedRow}>
-          <Ionicons name="time-outline" size={14} color={colors.text.muted} />
-          <Text style={styles.updatedText}>Son güncelleme: {updatedAt} · Aşağı çekerek yenile</Text>
+        <View style={styles.metaRow}>
+          <View style={styles.updatedRow}>
+            <Ionicons name="time-outline" size={13} color={colors.text.muted} />
+            <Text style={styles.updatedText}>Son güncelleme: {updatedAt}</Text>
+          </View>
+          <Text style={styles.hint}>Kura tıkla → 30 günlük grafik</Text>
         </View>
-        <Text style={styles.hint}>Grafiği görmek için bir kura tıkla</Text>
 
         {ratesData?.sections.map((section) => (
           <View key={section.title} style={styles.section}>
@@ -262,12 +264,13 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 17, fontWeight: '700', color: colors.text.primary },
   scroll: { flex: 1 },
   content: { padding: theme.spacing.md, paddingBottom: 32 },
-  updatedRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    justifyContent: 'flex-end', marginBottom: 4,
+  metaRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginBottom: theme.spacing.md,
   },
+  updatedRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   updatedText: { ...theme.typography.caption, color: colors.text.muted },
-  hint: { ...theme.typography.caption, color: colors.text.muted, textAlign: 'center', marginBottom: theme.spacing.md },
+  hint: { ...theme.typography.caption, color: colors.business, fontWeight: '500' },
   section: { marginBottom: theme.spacing.lg },
   sectionTitle: {
     fontSize: 13, fontWeight: '600', color: colors.text.muted,
@@ -317,9 +320,9 @@ const modal = StyleSheet.create({
   statsRow: { flexDirection: 'row', gap: theme.spacing.sm },
   stat: {
     flex: 1, backgroundColor: colors.card, borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md, alignItems: 'center', gap: 4,
+    padding: theme.spacing.md, gap: 4,
     ...theme.shadow.card,
   },
-  statLabel: { fontSize: 11, color: colors.text.muted },
-  statVal: { fontSize: 14, fontWeight: '700', color: colors.text.primary },
+  statLabel: { fontSize: 11, color: colors.text.muted, textAlign: 'center', width: '100%' },
+  statVal: { fontSize: 14, fontWeight: '700', color: colors.text.primary, textAlign: 'center', width: '100%' },
 });
