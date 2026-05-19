@@ -113,7 +113,7 @@ export default function SiparislerimScreen({ navigation }: { navigation: any }) 
     setSaving(true);
     try {
       const res = await ordersAPI.create({
-        role: activeTab,
+        role: 'seller',
         otherPartyName: form.otherPartyName.trim(),
         productName: form.productName.trim(),
         quantity: Number(form.quantity),
@@ -122,11 +122,7 @@ export default function SiparislerimScreen({ navigation }: { navigation: any }) 
         currency: form.currency,
         note: form.note.trim() || undefined,
       });
-      if (activeTab === 'buyer') {
-        setBuyerOrders(prev => [res.data, ...prev]);
-      } else {
-        setSellerOrders(prev => [res.data, ...prev]);
-      }
+      setSellerOrders(prev => [res.data, ...prev]);
       setAddModal(false);
       setForm(emptyForm());
     } catch {
@@ -141,9 +137,11 @@ export default function SiparislerimScreen({ navigation }: { navigation: any }) 
       order.product_name,
       'Ne yapmak istiyorsunuz?',
       [
-        { text: 'Durumu Güncelle', onPress: () => setStatusModal({ visible: true, order }) },
-        { text: 'Sil', style: 'destructive', onPress: () => confirmDelete(order) },
-        { text: 'İptal', style: 'cancel' },
+        ...(order.role === 'seller'
+          ? [{ text: 'Durumu Güncelle', onPress: () => setStatusModal({ visible: true, order }) }]
+          : []),
+        { text: 'Sil', style: 'destructive' as const, onPress: () => confirmDelete(order) },
+        { text: 'İptal', style: 'cancel' as const },
       ]
     );
   };
@@ -236,9 +234,13 @@ export default function SiparislerimScreen({ navigation }: { navigation: any }) 
           <Ionicons name="arrow-back" size={22} color={colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Siparişlerim</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={() => setAddModal(true)}>
-          <Ionicons name="add" size={26} color={colors.business} />
-        </TouchableOpacity>
+        {activeTab === 'seller' ? (
+          <TouchableOpacity style={styles.addBtn} onPress={() => setAddModal(true)}>
+            <Ionicons name="add" size={26} color={colors.business} />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 36 }} />
+        )}
       </View>
 
       {/* Tabs */}
@@ -263,11 +265,19 @@ export default function SiparislerimScreen({ navigation }: { navigation: any }) 
         </View>
       ) : orders.length === 0 ? (
         <View style={styles.centered}>
-          <Ionicons name="cube-outline" size={52} color={colors.text.muted} />
+          <Ionicons
+            name={activeTab === 'buyer' ? 'storefront-outline' : 'cube-outline'}
+            size={52}
+            color={colors.text.muted}
+          />
           <Text style={styles.emptyTitle}>
             {activeTab === 'buyer' ? 'Verilen sipariş yok' : 'Alınan sipariş yok'}
           </Text>
-          <Text style={styles.emptyDesc}>Sağ üstteki + ile sipariş ekleyin.</Text>
+          <Text style={styles.emptyDesc}>
+            {activeTab === 'buyer'
+              ? 'Pazaryerinde bir ilana girerek "Sipariş Ver" butonunu kullanın.'
+              : 'Sağ üstteki + ile alınan sipariş ekleyin.'}
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -293,11 +303,9 @@ export default function SiparislerimScreen({ navigation }: { navigation: any }) 
           <TouchableOpacity style={styles.overlay} onPress={() => setAddModal(false)} />
           <View style={styles.sheet}>
             <View style={styles.sheetHandle} />
-            <Text style={styles.sheetTitle}>
-              {activeTab === 'buyer' ? 'Verilen Sipariş Ekle' : 'Alınan Sipariş Ekle'}
-            </Text>
+            <Text style={styles.sheetTitle}>Alınan Sipariş Ekle</Text>
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Field label={activeTab === 'buyer' ? 'Satıcı Adı *' : 'Alıcı Adı *'}>
+              <Field label="Alıcı Adı *">
                 <TextInput
                   style={styles.input}
                   placeholder="Firma veya kişi adı"
