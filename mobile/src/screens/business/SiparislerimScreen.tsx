@@ -1,8 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, Alert, Modal, TextInput, ScrollView,
-  KeyboardAvoidingView, Platform,
+  ActivityIndicator, Alert, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -37,46 +36,12 @@ const STATUS_INFO: Record<OrderStatus, { label: string; color: string; bg: strin
 };
 
 const STATUS_ORDER: OrderStatus[] = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
-const CURRENCIES = ['TRY', 'USD', 'EUR'];
-
-type FormData = {
-  otherPartyName: string;
-  productName: string;
-  quantity: string;
-  unit: string;
-  unitPrice: string;
-  currency: string;
-  note: string;
-};
-
-const emptyForm = (): FormData => ({
-  otherPartyName: '',
-  productName: '',
-  quantity: '',
-  unit: '',
-  unitPrice: '',
-  currency: 'TRY',
-  note: '',
-});
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      {children}
-    </View>
-  );
-}
 
 export default function SiparislerimScreen({ navigation }: { navigation: any }) {
   const [activeTab, setActiveTab] = useState<'buyer' | 'seller'>('buyer');
   const [buyerOrders, setBuyerOrders] = useState<Order[]>([]);
   const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [addModal, setAddModal] = useState(false);
-  const [form, setForm] = useState<FormData>(emptyForm());
-  const [saving, setSaving] = useState(false);
 
   const [statusModal, setStatusModal] = useState<{ visible: boolean; order: Order | null }>({
     visible: false,
@@ -104,33 +69,6 @@ export default function SiparislerimScreen({ navigation }: { navigation: any }) 
   useFocusEffect(useCallback(() => {
     fetchOrders();
   }, [fetchOrders]));
-
-  const handleSave = async () => {
-    if (!form.otherPartyName.trim() || !form.productName.trim() || !form.quantity || !form.unitPrice) {
-      Alert.alert('Eksik Bilgi', 'Zorunlu alanları doldurun.');
-      return;
-    }
-    setSaving(true);
-    try {
-      const res = await ordersAPI.create({
-        role: 'seller',
-        otherPartyName: form.otherPartyName.trim(),
-        productName: form.productName.trim(),
-        quantity: Number(form.quantity),
-        unit: form.unit.trim() || undefined,
-        unitPrice: Number(form.unitPrice),
-        currency: form.currency,
-        note: form.note.trim() || undefined,
-      });
-      setSellerOrders(prev => [res.data, ...prev]);
-      setAddModal(false);
-      setForm(emptyForm());
-    } catch {
-      Alert.alert('Hata', 'Sipariş kaydedilemedi.');
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleLongPress = (order: Order) => {
     Alert.alert(
@@ -234,13 +172,7 @@ export default function SiparislerimScreen({ navigation }: { navigation: any }) 
           <Ionicons name="arrow-back" size={22} color={colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Siparişlerim</Text>
-        {activeTab === 'seller' ? (
-          <TouchableOpacity style={styles.addBtn} onPress={() => setAddModal(true)}>
-            <Ionicons name="add" size={26} color={colors.business} />
-          </TouchableOpacity>
-        ) : (
-          <View style={{ width: 36 }} />
-        )}
+        <View style={{ width: 36 }} />
       </View>
 
       {/* Tabs */}
@@ -275,8 +207,8 @@ export default function SiparislerimScreen({ navigation }: { navigation: any }) 
           </Text>
           <Text style={styles.emptyDesc}>
             {activeTab === 'buyer'
-              ? 'Pazaryerinde bir ilana girerek "Sipariş Ver" butonunu kullanın.'
-              : 'Sağ üstteki + ile alınan sipariş ekleyin.'}
+              ? 'Pazaryerinde bir ilana girerek sipariş ver.'
+              : 'Pazaryerinden gelen siparişler burada görünür.'}
           </Text>
         </View>
       ) : (
@@ -288,130 +220,6 @@ export default function SiparislerimScreen({ navigation }: { navigation: any }) 
           ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
         />
       )}
-
-      {/* Sipariş Ekle Modal */}
-      <Modal
-        visible={addModal}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setAddModal(false)}
-      >
-        <KeyboardAvoidingView
-          style={styles.modalWrap}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        >
-          <TouchableOpacity style={styles.overlay} onPress={() => setAddModal(false)} />
-          <View style={styles.sheet}>
-            <View style={styles.sheetHandle} />
-            <Text style={styles.sheetTitle}>Alınan Sipariş Ekle</Text>
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <Field label="Alıcı Adı *">
-                <TextInput
-                  style={styles.input}
-                  placeholder="Firma veya kişi adı"
-                  placeholderTextColor={colors.text.muted}
-                  value={form.otherPartyName}
-                  onChangeText={v => setForm(f => ({ ...f, otherPartyName: v }))}
-                />
-              </Field>
-
-              <Field label="Ürün / Hizmet Adı *">
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ör: Organik Zeytinyağı"
-                  placeholderTextColor={colors.text.muted}
-                  value={form.productName}
-                  onChangeText={v => setForm(f => ({ ...f, productName: v }))}
-                />
-              </Field>
-
-              <View style={styles.row}>
-                <View style={{ flex: 1.5 }}>
-                  <Field label="Miktar *">
-                    <TextInput
-                      style={styles.input}
-                      placeholder="100"
-                      placeholderTextColor={colors.text.muted}
-                      keyboardType="numeric"
-                      value={form.quantity}
-                      onChangeText={v => setForm(f => ({ ...f, quantity: v }))}
-                    />
-                  </Field>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Field label="Birim">
-                    <TextInput
-                      style={styles.input}
-                      placeholder="kg"
-                      placeholderTextColor={colors.text.muted}
-                      value={form.unit}
-                      onChangeText={v => setForm(f => ({ ...f, unit: v }))}
-                    />
-                  </Field>
-                </View>
-              </View>
-
-              <View style={styles.row}>
-                <View style={{ flex: 2 }}>
-                  <Field label="Birim Fiyat *">
-                    <TextInput
-                      style={styles.input}
-                      placeholder="180"
-                      placeholderTextColor={colors.text.muted}
-                      keyboardType="numeric"
-                      value={form.unitPrice}
-                      onChangeText={v => setForm(f => ({ ...f, unitPrice: v }))}
-                    />
-                  </Field>
-                </View>
-                <View style={{ flex: 1.2 }}>
-                  <Field label="Para Birimi">
-                    <View style={styles.currencyRow}>
-                      {CURRENCIES.map(c => (
-                        <TouchableOpacity
-                          key={c}
-                          style={[styles.currencyBtn, form.currency === c && styles.currencyBtnActive]}
-                          onPress={() => setForm(f => ({ ...f, currency: c }))}
-                        >
-                          <Text style={[styles.currencyText, form.currency === c && styles.currencyTextActive]}>
-                            {c}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </Field>
-                </View>
-              </View>
-
-              {form.quantity && form.unitPrice ? (
-                <Text style={styles.totalPreview}>
-                  Toplam: {(Number(form.quantity) * Number(form.unitPrice)).toLocaleString('tr-TR')} {form.currency}
-                </Text>
-              ) : null}
-
-              <Field label="Not">
-                <TextInput
-                  style={[styles.input, { height: 72, textAlignVertical: 'top' }]}
-                  placeholder="Opsiyonel not..."
-                  placeholderTextColor={colors.text.muted}
-                  multiline
-                  value={form.note}
-                  onChangeText={v => setForm(f => ({ ...f, note: v }))}
-                />
-              </Field>
-
-              <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
-                {saving ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.saveBtnText}>Kaydet</Text>
-                )}
-              </TouchableOpacity>
-              <View style={{ height: 24 }} />
-            </ScrollView>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
 
       {/* Durum Güncelle Modal */}
       <Modal
@@ -472,8 +280,6 @@ const styles = StyleSheet.create({
   },
   backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: 17, fontWeight: '700', color: colors.text.primary, flex: 1, textAlign: 'center' },
-  addBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
-
   tabs: {
     flexDirection: 'row',
     backgroundColor: colors.card,
@@ -520,7 +326,6 @@ const styles = StyleSheet.create({
   noteText: { fontSize: 12, color: colors.text.muted, fontStyle: 'italic' },
   dateText: { fontSize: 11, color: colors.text.muted },
 
-  modalWrap: { flex: 1 },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
   sheet: {
     backgroundColor: colors.card,
@@ -536,51 +341,6 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   sheetTitle: { fontSize: 17, fontWeight: '700', color: colors.text.primary, marginBottom: 16 },
-
-  field: { marginBottom: 12 },
-  fieldLabel: { fontSize: 12, fontWeight: '600', color: colors.text.muted, marginBottom: 6 },
-  input: {
-    backgroundColor: colors.background,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: colors.text.primary,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-
-  row: { flexDirection: 'row', gap: 10 },
-
-  currencyRow: { flexDirection: 'row', gap: 4, flexWrap: 'wrap' },
-  currencyBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.background,
-  },
-  currencyBtnActive: { borderColor: colors.business, backgroundColor: colors.primaryLight },
-  currencyText: { fontSize: 12, fontWeight: '600', color: colors.text.secondary },
-  currencyTextActive: { color: colors.business },
-
-  totalPreview: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.business,
-    textAlign: 'right',
-    marginBottom: 12,
-  },
-
-  saveBtn: {
-    backgroundColor: colors.business,
-    borderRadius: 12,
-    padding: 15,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  saveBtnText: { fontSize: 15, fontWeight: '700', color: '#fff' },
 
   statusItem: {
     flexDirection: 'row',

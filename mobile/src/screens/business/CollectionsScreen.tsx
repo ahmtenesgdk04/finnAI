@@ -148,8 +148,8 @@ export default function CollectionsScreen({ navigation }: { navigation: any }) {
             <Ionicons name="chevron-back" size={26} color={colors.text.primary} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
-            <Text style={styles.title}>TahsilatAI</Text>
-            <Text style={styles.subtitle}>Alacak takibi ve ödeme skoru</Text>
+            <Text style={styles.title}>Alacak Takibi</Text>
+            <Text style={styles.subtitle}>Müşteri alacak takibi ve AI tavsiye</Text>
           </View>
           <TouchableOpacity
             style={[styles.addFab, { backgroundColor: colors.business }]}
@@ -193,7 +193,7 @@ export default function CollectionsScreen({ navigation }: { navigation: any }) {
         >
           {analyzing ? <ActivityIndicator color="#fff" size="small" /> : <Ionicons name="people" size={18} color="#fff" />}
           <Text style={styles.analyzeBtnText}>
-            {analyzing ? 'Analiz ediliyor...' : 'AI Tahsilat Analizi'}
+            {analyzing ? 'Analiz ediliyor...' : 'AI Alacak Analizi'}
           </Text>
         </TouchableOpacity>
 
@@ -224,9 +224,7 @@ export default function CollectionsScreen({ navigation }: { navigation: any }) {
                           {urgencyLabel(score.urgency)}
                         </Text>
                       </View>
-                      <Text style={styles.probabilityText}>
-                        Tahsilat olasılığı: %{score.paymentProbability}
-                      </Text>
+                      <Text style={styles.probabilityText} numberOfLines={1}>{score.recommendation}</Text>
                       <Ionicons name="chevron-forward" size={14} color={colors.text.muted} />
                     </TouchableOpacity>
                   )}
@@ -329,14 +327,7 @@ export default function CollectionsScreen({ navigation }: { navigation: any }) {
           <View style={styles.modalCard}>
             {selectedScore && (
               <>
-                <Text style={styles.modalTitle}>Tahsilat Analizi</Text>
-
-                <View style={[styles.probCircle, { borderColor: urgencyColor(selectedScore.urgency) }]}>
-                  <Text style={[styles.probNumber, { color: urgencyColor(selectedScore.urgency) }]}>
-                    %{selectedScore.paymentProbability}
-                  </Text>
-                  <Text style={styles.probLabel}>tahsilat</Text>
-                </View>
+                <Text style={styles.modalTitle}>AI Tavsiye</Text>
 
                 <View style={[styles.urgencyBanner, { backgroundColor: urgencyColor(selectedScore.urgency) + '15' }]}>
                   <Text style={[styles.urgencyBannerText, { color: urgencyColor(selectedScore.urgency) }]}>
@@ -344,11 +335,8 @@ export default function CollectionsScreen({ navigation }: { navigation: any }) {
                   </Text>
                 </View>
 
-                <Text style={styles.detailSection}>Öneri</Text>
+                <Text style={styles.detailSection}>Tavsiye</Text>
                 <Text style={styles.detailText}>{selectedScore.recommendation}</Text>
-
-                <Text style={styles.detailSection}>Görüşme Taslağı</Text>
-                <Text style={styles.detailText}>{selectedScore.followUpScript}</Text>
 
                 <TouchableOpacity style={styles.saveBtn} onPress={() => setDetailVisible(false)}>
                   <Text style={styles.saveText}>Kapat</Text>

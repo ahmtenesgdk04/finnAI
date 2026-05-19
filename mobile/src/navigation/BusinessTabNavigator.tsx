@@ -83,14 +83,14 @@ function AIMenuScreen({ navigation }: { navigation: any }) {
 
         <TouchableOpacity
           style={styles.aiMenuItem}
-          onPress={() => navigation.navigate('TahsilatAI')}
+          onPress={() => navigation.navigate('AlacakTakibi')}
         >
           <View style={[styles.aiMenuIcon, { backgroundColor: '#FEE2E2' }]}>
             <Ionicons name="people-outline" size={26} color={colors.danger} />
           </View>
           <View style={styles.aiMenuText}>
-            <Text style={styles.aiMenuItemTitle}>TahsilatAI</Text>
-            <Text style={styles.aiMenuItemSub}>Müşteri ödeme skoru + takip</Text>
+            <Text style={styles.aiMenuItemTitle}>Alacak Takibi</Text>
+            <Text style={styles.aiMenuItemSub}>Müşteri alacak takibi ve AI tavsiye</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.text.muted} />
         </TouchableOpacity>
@@ -125,7 +125,7 @@ function AIAraclarNavigator() {
       <AIStack.Screen name="AIMenu" component={AIMenuScreen} options={{ title: 'AI Araçlar', headerShown: false }} />
       <AIStack.Screen name="NakitRadar" component={CashflowScreen} options={{ title: 'NakitRadar', headerShown: false }} />
       <AIStack.Screen name="AkilliGiderAnalizi" component={ExpenseAnalysisScreen} options={{ title: 'Akıllı Gider Analizi', headerShown: false }} />
-      <AIStack.Screen name="TahsilatAI" component={CollectionsScreen} options={{ title: 'TahsilatAI', headerShown: false }} />
+      <AIStack.Screen name="AlacakTakibi" component={CollectionsScreen} options={{ title: 'Alacak Takibi', headerShown: false }} />
       <AIStack.Screen name="GuvenlIAlis" component={SupplierCheckScreen} options={{ title: 'GüvenliAlış', headerShown: false }} />
     </AIStack.Navigator>
   );
