@@ -10,15 +10,29 @@ import ExpenseAnalysisScreen from '../screens/business/ExpenseAnalysisScreen';
 import CollectionsScreen from '../screens/business/CollectionsScreen';
 import SupplierCheckScreen from '../screens/business/SupplierCheckScreen';
 import MarketplaceScreen from '../screens/business/MarketplaceScreen';
+import PazaryeriListesiScreen from '../screens/business/PazaryeriListesiScreen';
 import IlanVerScreen from '../screens/business/IlanVerScreen';
 import IlanlarimScreen from '../screens/business/IlanlarimScreen';
 import IlanDetayScreen from '../screens/business/IlanDetayScreen';
 import IslemlerScreen from '../screens/business/IslemlerScreen';
 import DashboardScreen from '../screens/business/DashboardScreen';
+import AyarlarScreen from '../screens/business/AyarlarScreen';
+import ContactsScreen from '../screens/business/ContactsScreen';
+import DocumentVaultScreen from '../screens/business/DocumentVaultScreen';
+import DueDateCalendarScreen from '../screens/business/DueDateCalendarScreen';
+import IncomesExpensesScreen from '../screens/business/IncomesExpensesScreen';
+import CalculatorScreen from '../screens/business/CalculatorScreen';
+import HealthScoreScreen from '../screens/shared/HealthScoreScreen';
+import ExchangeRatesScreen from '../screens/shared/ExchangeRatesScreen';
+import ConversationsScreen from '../screens/messages/ConversationsScreen';
+import ChatScreen from '../screens/messages/ChatScreen';
+import SiparislerimScreen from '../screens/business/SiparislerimScreen';
 
 const Tab = createBottomTabNavigator();
 const AIStack = createNativeStackNavigator();
 const MarketStack = createNativeStackNavigator();
+const AyarlarStack = createNativeStackNavigator();
+const MessagesStack = createNativeStackNavigator();
 
 
 function PlaceholderScreen({ title }: { title: string }) {
@@ -117,31 +131,8 @@ function AIAraclarNavigator() {
   );
 }
 
-function PazaryeriListesiScreen({ navigation }: { navigation: any }) {
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderEmoji}>🏪</Text>
-        <Text style={styles.placeholderTitle}>Pazaryeri</Text>
-        <Text style={styles.placeholderSub}>İlanlar yakında burada görünecek</Text>
-      </View>
-    </SafeAreaView>
-  );
-}
 
 
-
-function SiparislerimScreen({ navigation }: { navigation: any }) {
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderEmoji}>📦</Text>
-        <Text style={styles.placeholderTitle}>Siparişlerim</Text>
-        <Text style={styles.placeholderSub}>Siparişler yakında burada görünecek</Text>
-      </View>
-    </SafeAreaView>
-  );
-}
 
 function PazaryeriNavigator() {
   return (
@@ -156,7 +147,29 @@ function PazaryeriNavigator() {
   );
 }
 
-function AyarlarScreen() { return <PlaceholderScreen title="Ayarlar" />; }
+function MessagesNavigator() {
+  return (
+    <MessagesStack.Navigator screenOptions={{ headerShown: false }}>
+      <MessagesStack.Screen name="Conversations" component={ConversationsScreen} />
+      <MessagesStack.Screen name="Chat" component={ChatScreen} />
+    </MessagesStack.Navigator>
+  );
+}
+
+function AyarlarNavigator() {
+  return (
+    <AyarlarStack.Navigator screenOptions={{ headerShown: false }}>
+      <AyarlarStack.Screen name="AyarlarMenu" component={AyarlarScreen} />
+      <AyarlarStack.Screen name="Rehber" component={ContactsScreen} />
+      <AyarlarStack.Screen name="Belgelerim" component={DocumentVaultScreen} />
+      <AyarlarStack.Screen name="Takvim" component={DueDateCalendarScreen} />
+      <AyarlarStack.Screen name="GelirGider" component={IncomesExpensesScreen} />
+      <AyarlarStack.Screen name="HesapMakinesi" component={CalculatorScreen} />
+      <AyarlarStack.Screen name="FinansalSaglik" component={HealthScoreScreen} />
+      <AyarlarStack.Screen name="DovizKurlari" component={ExchangeRatesScreen} />
+    </AyarlarStack.Navigator>
+  );
+}
 
 export default function BusinessTabNavigator() {
   return (
@@ -187,10 +200,17 @@ export default function BusinessTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="İşlemler"
+        name="Mesajlar"
+        component={MessagesNavigator}
+        options={{
+          tabBarIcon: ({ color, size }) => <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="Muhasebe"
         component={IslemlerScreen}
         options={{
-          tabBarIcon: ({ color, size }) => <Ionicons name="swap-horizontal-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="bar-chart-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
@@ -202,7 +222,7 @@ export default function BusinessTabNavigator() {
       />
       <Tab.Screen
         name="Ayarlar"
-        component={AyarlarScreen}
+        component={AyarlarNavigator}
         options={{
           tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}

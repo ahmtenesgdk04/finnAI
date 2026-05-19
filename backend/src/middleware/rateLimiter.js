@@ -1,8 +1,10 @@
 const rateLimit = require('express-rate-limit');
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: isDev ? 1000 : 100,
   message: { success: false, message: 'Çok fazla istek gönderildi, lütfen bekleyin' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -10,7 +12,7 @@ const generalLimiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: isDev ? 100 : 10,
   message: { success: false, message: 'Çok fazla giriş denemesi' },
 });
 

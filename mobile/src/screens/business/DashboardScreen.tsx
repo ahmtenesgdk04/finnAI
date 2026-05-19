@@ -11,9 +11,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '../../constants/colors';
 import { businessAPI } from '../../services/api';
 import { useAuth } from '../../hooks/useAuth';
+
+type Reminder = { id: string; title: string; date: string; time?: string; note?: string };
 
 type MonthYear = { year: number; month: number };
 
@@ -90,6 +93,7 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [dayModalVisible, setDayModalVisible] = useState(false);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
 
   const fetchAll = async (my: MonthYear) => {
     setLoading(true);
@@ -110,6 +114,9 @@ export default function DashboardScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchAll(curMonth);
+      AsyncStorage.getItem('calendar_reminders').then(raw => {
+        setReminders(raw ? JSON.parse(raw) : []);
+      });
     }, [curMonth])
   );
 
@@ -149,8 +156,19 @@ export default function DashboardScreen() {
   ];
   while (cells.length % 7 !== 0) cells.push(null);
 
+  const monthPrefix = `${curMonth.year}-${String(curMonth.month + 1).padStart(2, '0')}-`;
+  const reminderDayMap: Record<number, Reminder[]> = {};
+  reminders
+    .filter(r => r.date.startsWith(monthPrefix))
+    .forEach(r => {
+      const day = parseInt(r.date.split('-')[2], 10);
+      if (!reminderDayMap[day]) reminderDayMap[day] = [];
+      reminderDayMap[day].push(r);
+    });
+
   const todayNum = isNow ? new Date().getDate() : -1;
   const selectedEntries = selectedDay != null ? (dayMap[selectedDay]?.entries ?? []) : [];
+  const selectedReminders = selectedDay != null ? (reminderDayMap[selectedDay] ?? []) : [];
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -260,6 +278,9 @@ export default function DashboardScreen() {
                                 {info?.hasExpense && (
                                   <View style={[styles.dot, { backgroundColor: colors.danger }]} />
                                 )}
+                                {reminderDayMap[day]?.length > 0 && (
+                                  <View style={[styles.dot, { backgroundColor: colors.business }]} />
+                                )}
                               </View>
                             </>
                           )}
@@ -323,8 +344,8 @@ export default function DashboardScreen() {
             <Text style={styles.dayTitle}>
               {selectedDay} {MONTHS_TR[curMonth.month]} {curMonth.year}
             </Text>
-            {selectedEntries.length === 0 ? (
-              <Text style={styles.emptyText}>Bu gün işlem yok</Text>
+            {selectedEntries.length === 0 && selectedReminders.length === 0 ? (
+              <Text style={styles.emptyText}>Bu gün için kayıt yok</Text>
             ) : (
               <ScrollView showsVerticalScrollIndicator={false}>
                 {selectedEntries.map(e => (
@@ -349,6 +370,24 @@ export default function DashboardScreen() {
                     </Text>
                   </View>
                 ))}
+                {selectedReminders.length > 0 && (
+                  <>
+                    {selectedEntries.length > 0 && <View style={styles.modalDivider} />}
+                    <Text style={styles.modalSubTitle}>Hatırlatmalar</Text>
+                    {selectedReminders.map(r => (
+                      <View key={r.id} style={styles.entryRow}>
+                        <View style={[styles.entryIcon, { backgroundColor: colors.primaryLight }]}>
+                          <Ionicons name="notifications-outline" size={16} color={colors.business} />
+                        </View>
+                        <View style={styles.entryInfo}>
+                          <Text style={styles.entryLabel}>{r.title}</Text>
+                          {r.time ? <Text style={styles.entryDate}>{r.time}</Text> : null}
+                          {r.note ? <Text style={styles.entryDate}>{r.note}</Text> : null}
+                        </View>
+                      </View>
+                    ))}
+                  </>
+                )}
               </ScrollView>
             )}
           </View>
@@ -520,4 +559,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   dayTitle: { fontSize: 17, fontWeight: '700', color: colors.text.primary, marginBottom: 16 },
+  modalDivider: { height: 1, backgroundColor: colors.border, marginVertical: 12 },
+  modalSubTitle: { fontSize: 13, fontWeight: '600', color: colors.text.muted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
 });

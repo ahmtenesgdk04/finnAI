@@ -24,15 +24,76 @@ app.use('/api/cashflow', require('./routes/cashflow'));
 app.use('/api/collection', require('./routes/collections'));
 app.use('/api/supplier', require('./routes/supplier'));
 app.use('/api/marketplace', require('./routes/marketplace'));
+app.use('/api/messages', require('./routes/messages'));
+app.use('/api/orders', require('./routes/orders'));
 
 app.get('/health', (req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV }));
 
 app.use(notFound);
 app.use(errorHandler);
 
+const seedBusiness = require('./scripts/seedBusiness');
+const db = require('./config/database');
+
+const initDB = async () => {
+  await db.query(`
+    DROP TABLE IF EXISTS password_reset_tokens;
+    CREATE TABLE password_reset_tokens (
+      id SERIAL PRIMARY KEY,
+      user_id UUID NOT NULL,
+      otp_hash VARCHAR(64) NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+      user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      role VARCHAR(10) NOT NULL CHECK (role IN ('buyer', 'seller')),
+      other_party_name VARCHAR(200) NOT NULL,
+      product_name VARCHAR(200) NOT NULL,
+      quantity NUMERIC(12,2) NOT NULL,
+      unit VARCHAR(50),
+      unit_price NUMERIC(12,2) NOT NULL,
+      currency VARCHAR(10) DEFAULT 'TRY',
+      total_price NUMERIC(12,2) NOT NULL,
+      status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'shipped', 'delivered', 'cancelled')),
+      note TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id);
+  `);
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS conversations (
+      id SERIAL PRIMARY KEY,
+      listing_id TEXT NOT NULL,
+      buyer_id UUID NOT NULL,
+      seller_id UUID NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW(),
+      UNIQUE(listing_id, buyer_id)
+    );
+    CREATE TABLE IF NOT EXISTS messages (
+      id SERIAL PRIMARY KEY,
+      conversation_id INTEGER NOT NULL,
+      sender_id UUID NOT NULL,
+      content TEXT NOT NULL,
+      read_at TIMESTAMP,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+  `);
+};
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`FinnAI backend çalışıyor: http://localhost:${PORT}`);
+  try {
+    await initDB();
+    await seedBusiness();
+  } catch (e) {
+    console.error('[init] Hata:', e.message);
+  }
 });
 
 module.exports = app;
