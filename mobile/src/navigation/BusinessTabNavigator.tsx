@@ -26,6 +26,7 @@ import HealthScoreScreen from '../screens/shared/HealthScoreScreen';
 import ExchangeRatesScreen from '../screens/shared/ExchangeRatesScreen';
 import ConversationsScreen from '../screens/messages/ConversationsScreen';
 import ChatScreen from '../screens/messages/ChatScreen';
+import SiparislerimScreen from '../screens/business/SiparislerimScreen';
 
 const Tab = createBottomTabNavigator();
 const AIStack = createNativeStackNavigator();
@@ -132,17 +133,6 @@ function AIAraclarNavigator() {
 
 
 
-function SiparislerimScreen({ navigation }: { navigation: any }) {
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.placeholder}>
-        <Text style={styles.placeholderEmoji}>📦</Text>
-        <Text style={styles.placeholderTitle}>Siparişlerim</Text>
-        <Text style={styles.placeholderSub}>Siparişler yakında burada görünecek</Text>
-      </View>
-    </SafeAreaView>
-  );
-}
 
 function PazaryeriNavigator() {
   return (

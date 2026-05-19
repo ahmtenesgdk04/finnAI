@@ -139,6 +139,25 @@ export const marketplaceAPI = {
     api.delete(`/api/marketplace/${id}`),
 };
 
+export const ordersAPI = {
+  create: (data: {
+    role: 'buyer' | 'seller';
+    otherPartyName: string;
+    productName: string;
+    quantity: number;
+    unit?: string;
+    unitPrice: number;
+    currency?: string;
+    note?: string;
+  }) => api.post('/api/orders', data),
+  getOrders: (role?: 'buyer' | 'seller') =>
+    api.get('/api/orders', { params: role ? { role } : undefined }),
+  updateStatus: (id: string, status: string) =>
+    api.patch(`/api/orders/${id}/status`, { status }),
+  deleteOrder: (id: string) =>
+    api.delete(`/api/orders/${id}`),
+};
+
 export const messagesAPI = {
   startOrGetConversation: (listingId: string, sellerId: string) =>
     api.post('/api/messages/conversation', { listingId, sellerId }),
