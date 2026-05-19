@@ -43,9 +43,11 @@ const getSummary = async (userId, monthStr) => {
     isIncome: true,
   }));
 
-  const allEntries = [...entries, ...incomeAsEntries].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+  const allEntries = [...entries, ...incomeAsEntries].sort((a, b) => {
+    const dateA = a.created_at || a.date;
+    const dateB = b.created_at || b.date;
+    return new Date(dateB).getTime() - new Date(dateA).getTime();
+  });
 
   return {
     month: monthStr,

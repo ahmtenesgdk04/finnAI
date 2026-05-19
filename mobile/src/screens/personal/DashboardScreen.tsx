@@ -120,7 +120,9 @@ export default function DashboardScreen() {
             <View key={entry.id} style={styles.entryRow}>
               <View style={styles.entryLeft}>
                 <Text style={styles.entryCategory}>{entry.category}</Text>
-                <Text style={styles.entryNote}>{entry.note || entry.date}</Text>
+                {entry.note && !/^\d{4}-\d{2}-\d{2}T/.test(entry.note) && (
+                  <Text style={styles.entryNote}>{entry.note}</Text>
+                )}
               </View>
               <Text style={[styles.entryAmount, entry.amount < 0 && { color: colors.secondary }]}>
                 {entry.amount < 0 ? `+${formatCurrency(-entry.amount)}` : `-${formatCurrency(entry.amount)}`}

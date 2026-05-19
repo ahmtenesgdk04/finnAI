@@ -174,7 +174,7 @@ export default function BudgetScreen() {
               </View>
               <View style={styles.entryInfo}>
                 <Text style={styles.entryCategory}>{e.category}</Text>
-                {e.note ? <Text style={styles.entryNote}>{e.note}</Text> : null}
+                {e.note && !/^\d{4}-\d{2}-\d{2}T/.test(e.note) ? <Text style={styles.entryNote}>{e.note}</Text> : null}
                 <Text style={styles.entryDate}>
                   {new Date(e.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
                 </Text>
