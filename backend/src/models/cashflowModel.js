@@ -127,4 +127,20 @@ const getSummaryByRange = async (userId, startDate, endDate) => {
   };
 };
 
-module.exports = { getMonthlyHistory, getCurrentMonthTotals, getRecentEntries, addExpense, addIncome, getSummaryByRange };
+const deleteExpense = async (userId, id) => {
+  const { rowCount } = await db.query(
+    `DELETE FROM business_expenses WHERE id = $1 AND user_id = $2`,
+    [id, userId]
+  );
+  return rowCount > 0;
+};
+
+const deleteIncome = async (userId, id) => {
+  const { rowCount } = await db.query(
+    `DELETE FROM business_incomes WHERE id = $1 AND user_id = $2`,
+    [id, userId]
+  );
+  return rowCount > 0;
+};
+
+module.exports = { getMonthlyHistory, getCurrentMonthTotals, getRecentEntries, addExpense, addIncome, getSummaryByRange, deleteExpense, deleteIncome };

@@ -1,5 +1,9 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
 const dns = require('dns');
+
+// DATE sütunları JS Date'e çevrilmesin, düz 'YYYY-MM-DD' string kalsın
+types.setTypeParser(1082, val => val);
+
 dns.setDefaultResultOrder('ipv4first');
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
